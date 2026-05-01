@@ -8,6 +8,7 @@ export const translations = {
       delete: 'Purge',
       search: 'Search Destinations',
       reserve: 'Initialize Access',
+      back: 'Back',
     },
     nav: {
       hotels: 'Hotels',
@@ -21,6 +22,7 @@ export const translations = {
       subtitle: 'REDIFINING THE INVISIBLE PROTOCOL 77',
       searchPlaceholder: 'Where will your journey begin?',
       initialize: 'Initialize',
+      deals: 'Exclusive Deals',
     },
     home: {
       searchTitle: 'Where will your next journey begin?',
@@ -48,6 +50,8 @@ export const translations = {
       price: 'Sovereign Rate',
       reserve: 'Initialize Access',
       nights: 'Nights',
+      reviews: 'Reviews',
+      suites: 'Suites',
     }
   },
   ru: {
@@ -59,6 +63,7 @@ export const translations = {
       delete: 'Удалить',
       search: 'Поиск направлений',
       reserve: 'Инициализировать доступ',
+      back: 'Назад',
     },
     nav: {
       hotels: 'Отели',
@@ -72,6 +77,7 @@ export const translations = {
       subtitle: 'ПЕРЕОПРЕДЕЛЕНИЕ НЕВИДИМОГО ПРОТОКОЛА 77',
       searchPlaceholder: 'Где начнется ваше путешествие?',
       initialize: 'Начать',
+      deals: 'Эксклюзивные Предложения',
     },
     home: {
       searchTitle: 'Где начнется ваше следующее путешествие?',
@@ -99,6 +105,8 @@ export const translations = {
       price: 'Ставка Суверена',
       reserve: 'Получить доступ',
       nights: 'Ночи',
+      reviews: 'Отзывы',
+      suites: 'Номера',
     }
   },
   tj: {
@@ -110,6 +118,7 @@ export const translations = {
       delete: 'Нест кардан',
       search: 'Ҷустуҷӯи самтҳо',
       reserve: 'Оғози дастрасӣ',
+      back: 'Бозгашт',
     },
     nav: {
       hotels: 'Меҳмонхонаҳо',
@@ -123,6 +132,7 @@ export const translations = {
       subtitle: 'ТАЪРИФИ ДУБОРАИ ПРОТОКОЛИ НОАЁН 77',
       searchPlaceholder: 'Сафари шумо аз куҷо оғоз мешавад?',
       initialize: 'Оғоз',
+      deals: 'Пешниҳодҳои Махсус',
     },
     home: {
       searchTitle: 'Сафари навбатии шумо аз куҷо оғоз мешавад?',
@@ -150,6 +160,8 @@ export const translations = {
       price: 'Нархи Суверенӣ',
       reserve: 'Оғози дастрасӣ',
       nights: 'Шабҳо',
+      reviews: 'Шарҳҳо',
+      suites: 'Хуҷраҳо',
     }
   }
 }
