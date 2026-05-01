@@ -5,9 +5,11 @@ import { ArrowLeft, User, Lock, Save, CheckCircle2, ShieldCheck } from 'lucide-r
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '../../../lib/LanguageContext'
+import { useToast } from '../../../lib/ToastContext'
 
 export default function ProfileSettings() {
   const { t } = useLanguage()
+  const { toast } = useToast()
   const [user, setUser] = useState<any>(null)
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
@@ -44,10 +46,13 @@ export default function ProfileSettings() {
         setUser(updated)
         setPassword('')
         setSuccess(true)
+        toast('Profile updated successfully', 'success')
         setTimeout(() => setSuccess(false), 3000)
+      } else {
+        toast('Failed to update profile', 'error')
       }
     } catch {
-      alert('Update failed')
+      toast('Update failed: Connection error', 'error')
     } finally {
       setLoading(false)
     }

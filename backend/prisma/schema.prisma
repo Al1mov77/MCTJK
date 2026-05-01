@@ -18,6 +18,7 @@ model User {
   messages  Message[] @relation("SentMessages")
   received  Message[] @relation("ReceivedMessages")
   reviews   Review[]
+  roomComments RoomComment[]
   skills    String?   // JSON string
   isVip     Boolean   @default(false)
   points    Int       @default(0)
@@ -45,11 +46,13 @@ model Room {
   id          String    @id @default(uuid())
   hotelId     String
   hotel       Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  title       String    @default("Standard Room")
   price       Float
   discount    Float     @default(0)
   images      String?   // JSON string
   description String?
   bookings    Booking[]
+  comments    RoomComment[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -88,9 +91,20 @@ model Review {
   createdAt DateTime @default(now())
 }
 
+model RoomComment {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
+}
+
 model Post {
   id        String   @id @default(uuid())
   text      String
   image     String?
   createdAt DateTime @default(now())
 }
+

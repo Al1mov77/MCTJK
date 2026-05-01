@@ -39,7 +39,11 @@ export class HotelsService {
     const hotel = await this.prisma.hotel.findUnique({
       where: { id },
       include: {
-        rooms: true,
+        rooms: {
+          include: {
+            bookings: true
+          }
+        },
         reviews: {
           include: { user: true },
           orderBy: { createdAt: 'desc' }

@@ -10,10 +10,12 @@ import SafeImage from '../../components/SafeImage'
 import { ThemeToggle } from '../../components/ui/theme-toggle'
 import { cn } from '../../lib/utils'
 import { LocationIcon, StarIcon, WifiIcon, SpaIcon, PoolIcon, GymIcon, ConciergeIcon } from '../../components/HotelIcons'
+import { useToast } from '../../lib/ToastContext'
 
 export default function HotelsPage() {
   const { t, lang, setLang } = useLanguage()
   const { isDark } = useTheme()
+  const { toast } = useToast()
   const router = useRouter()
   const [hotels, setHotels] = useState<any[]>([])
   const [active, setActive] = useState<any>(null)
@@ -38,7 +40,10 @@ export default function HotelsPage() {
   const handleRate = async (rating: number) => {
     if (!active) return
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) {
+      toast(t.nav.signin, 'error')
+      return
+    }
 
     try {
       const res = await fetch(`http://localhost:4000/reviews/${active.id}`, {
@@ -50,17 +55,19 @@ export default function HotelsPage() {
         setUserRating(rating)
         const hRes = await fetch(`http://localhost:4000/hotels/${active.id}`)
         if (hRes.ok) setActive(await hRes.json())
+        toast('Rating submitted successfully', 'success')
       }
-    } catch {}
+    } catch {
+      toast('Failed to submit rating', 'error')
+    }
   }
 
   const handleBook = (roomId: string) => {
     const token = localStorage.getItem('token')
     if (!token) {
-      alert(t.nav.signin)
+      toast(t.nav.signin, 'error')
       return
     }
-    // Перенаправляем на страницу оплаты
     router.push(`/checkout?roomId=${roomId}`)
   }
 
@@ -127,7 +134,7 @@ export default function HotelsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {hotels.map((hotel, i) => (
               <motion.div key={hotel.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }}>
-                 <div onClick={() => { setActive(hotel); setOpen(true); }} className="relative overflow-hidden bg-gradient-to-br from-background to-muted border border-border rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 group cursor-pointer">
+                 <div onClick={() => router.push(`/hotels/${hotel.id}`)} className="relative overflow-hidden bg-gradient-to-br from-background to-muted border border-border rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 group cursor-pointer">
                     {/* Luxury Badge */}
                     <div className="absolute top-4 left-4 z-10">
                        <div className="px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
@@ -200,140 +207,6 @@ export default function HotelsPage() {
           </div>
         )}
       </div>
-
-      {/* ── Responsive Modal ── */}
-      <AnimatePresence>
-        {open && active && (
-          <div className="fixed inset-0 z-[500] flex items-end md:items-center justify-center p-0 md:p-8">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(false)} className="absolute inset-0 bg-background/60 backdrop-blur-md" />
-            
-            <motion.div initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 100 }} className="relative bg-gradient-to-br from-background to-muted border-t md:border border-amber-200/20 dark:border-amber-800/20 w-full max-w-5xl h-[92vh] md:h-[85vh] overflow-hidden rounded-t-[32px] md:rounded-2xl shadow-2xl flex flex-col md:flex-row">
-              <div className="md:w-1/2 h-[25vh] sm:h-[35vh] md:h-auto relative bg-muted shrink-0">
-                <SafeImage src={active.images?.[0]} fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* Luxury Badge */}
-                <div className="absolute top-6 left-6 z-10">
-                   <div className="px-4 py-2 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-2">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                      LUXURY COLLECTION
-                   </div>
-                </div>
-                
-                <button onClick={() => setOpen(false)} className="absolute top-6 right-6 w-12 h-12 rounded-full bg-background/80 backdrop-blur-lg border border-white/20 text-foreground flex items-center justify-center hover:bg-background hover:scale-110 transition-all shadow-lg">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 md:p-12 space-y-10 custom-scrollbar pb-32 md:pb-12">
-                <div className="flex justify-between items-start">
-                   <div className="space-y-4">
-                      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 rounded-full border border-amber-200/50 dark:border-amber-700/50">
-                         <LocationIcon width={12} height={12} className="text-amber-600 dark:text-amber-400" />
-                         <span className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-300">Premium Location</span>
-                      </motion.div>
-                      <h2 className="text-2xl md:text-4xl font-black tracking-tighter">
-                         <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">{active.title}</span>
-                      </h2>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground font-semibold">
-                         <LocationIcon width={14} height={14} className="text-amber-500" />
-                         {active.address}, {active.city}
-                      </div>
-                   </div>
-                </div>
-
-                <div className="space-y-10">
-                   <div className="space-y-6">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                         <div className="w-2 h-2 bg-amber-500 rounded-full" />
-                         About This Luxury Property
-                      </h4>
-                      <p className="text-sm md:text-base text-foreground font-medium leading-relaxed bg-gradient-to-r from-amber-50/30 to-rose-50/30 dark:from-amber-950/10 dark:to-rose-950/10 p-6 rounded-xl border border-amber-200/20 dark:border-amber-800/20">{active.description}</p>
-                   </div>
-
-                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      <div className="p-6 bg-gradient-to-br from-amber-50/50 to-rose-50/50 dark:from-amber-950/20 dark:to-rose-950/20 rounded-xl space-y-4 border border-amber-200/30 dark:border-amber-800/30">
-                         <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            <StarIcon width={12} height={12} className="text-amber-500" />
-                            {t.hotels.reviews}
-                         </h4>
-                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                               {[1, 2, 3, 4, 5].map((s) => (
-                                 <motion.button 
-                                    key={s} 
-                                    whileHover={{ scale: 1.2 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => handleRate(s)}
-                                    className="transition-all"
-                                 >
-                                    <StarIcon 
-                                       width={18} 
-                                       height={18} 
-                                       className={cn(
-                                          "transition-colors", 
-                                          s <= (userRating || active.rating) ? "text-amber-500" : "text-muted-foreground/30"
-                                       )}
-                                    />
-                                 </motion.button>
-                               ))}
-                            </div>
-                            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">{Number(active.rating || 5.0).toFixed(1)}</span>
-                         </div>
-                      </div>
-
-                      <div className="space-y-4">
-                         <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                            <div className="w-2 h-2 bg-amber-500 rounded-full" />
-                            {t.hotels.suites}
-                         </h4>
-                         <div className="space-y-3">
-                            {/* Показываем только 1 номер если это запрошено или просто список */}
-                            {active.rooms?.slice(0, 1).map((room: any, i: number) => (
-                              <motion.div 
-                                 key={room.id} 
-                                 initial={{ opacity: 0, x: -20 }}
-                                 animate={{ opacity: 1, x: 0 }}
-                                 transition={{ delay: i * 0.1 }}
-                                 className="p-4 border border-amber-200/30 dark:border-amber-800/30 rounded-xl bg-gradient-to-br from-background to-amber-50/20 dark:to-amber-950/20 flex justify-between items-center shadow-sm hover:shadow-md transition-all duration-300"
-                              >
-                                 <div>
-                                    <h5 className="font-bold text-xs mb-1">{room.title}</h5>
-                                    <div className="flex items-center gap-2">
-                                       <span className="text-2xl font-black bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">${room.price}</span>
-                                       <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">/ Night</span>
-                                    </div>
-                                 </div>
-                                 <motion.button 
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => handleBook(room.id)} 
-                                    className="h-10 px-5 text-[10px] font-black uppercase tracking-widest rounded-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white border-0 shadow-lg shadow-amber-500/25"
-                                 >
-                                    Reserve
-                                 </motion.button>
-                              </motion.div>
-                            ))}
-                            {active.rooms?.length > 1 && (
-                               <motion.p 
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ delay: 0.3 }}
-                                  className="text-[8px] text-amber-600 dark:text-amber-400 uppercase font-black tracking-widest text-center mt-2 flex items-center justify-center gap-2"
-                               >
-                                  <ConciergeIcon width={12} height={12} />
-                                  More luxury suites available in concierge
-                               </motion.p>
-                            )}
-                         </div>
-                      </div>
-                   </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </main>
   )
 }

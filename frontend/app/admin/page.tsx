@@ -10,12 +10,18 @@ import { ThemeToggle } from '../../components/ui/theme-toggle'
 import { cn } from '../../lib/utils'
 import { HotelIcon, ConciergeIcon, StarIcon } from '../../components/HotelIcons'
 
+import { useToast } from '../../lib/ToastContext'
+import { useConfirm } from '../../lib/ConfirmContext'
+
 export default function AdminDashboard() {
   const { isDark } = useTheme()
-  const [activeTab, setActiveTab] = useState<'bookings' | 'hotels' | 'users'>('bookings')
+  const { toast } = useToast()
+  const { confirm } = useConfirm()
+  const [activeTab, setActiveTab] = useState<'bookings' | 'hotels' | 'users' | 'comments'>('bookings')
   const [bookings, setBookings] = useState<any[]>([])
   const [hotels, setHotels] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
+  const [comments, setComments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [showHotelModal, setShowHotelModal] = useState(false)
@@ -44,17 +50,20 @@ export default function AdminDashboard() {
   const loadData = async (token: string) => {
     setLoading(true)
     try {
-      const [bRes, hRes, uRes] = await Promise.all([
+      const [bRes, hRes, uRes, cRes] = await Promise.all([
         fetch('http://localhost:4000/booking/all', { headers: { Authorization: `Bearer ${token}` } }),
         fetch('http://localhost:4000/hotels'),
-        fetch('http://localhost:4000/users', { headers: { Authorization: `Bearer ${token}` } })
+        fetch('http://localhost:4000/users', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('http://localhost:4000/room-comments', { headers: { Authorization: `Bearer ${token}` } })
       ])
       const bData = await bRes.json()
       const hData = await hRes.json()
       const uData = await uRes.json()
+      const cData = await cRes.json()
       setBookings(Array.isArray(bData) ? bData : [])
       setHotels(Array.isArray(hData) ? hData : [])
       setUsers(Array.isArray(uData) ? uData : [])
+      setComments(Array.isArray(cData) ? cData : [])
     } finally {
       setLoading(false)
     }
@@ -80,14 +89,15 @@ export default function AdminDashboard() {
         setBookings(prev => prev.map(b => 
           b.id === id ? { ...b, status: action === 'confirm' ? 'CONFIRMED' : 'CANCELLED' } : b
         ))
-
-        // Отправляем уведомление в чат пользователю (дублируем логику бэкенда для уверенности или просто логируем)
-        console.log(`Booking ${id} ${action}ed with reason: ${reason}`)
+        toast(`Booking ${action === 'confirm' ? 'Approved' : 'Cancelled'}`, 'success')
         setShowBookingModal(false)
         setBookingReason('')
         setBookingToUpdate(null)
+      } else {
+        toast('Failed to update booking', 'error')
       }
     } catch (err) {
+      toast('Network error', 'error')
       console.error(err)
     }
   }
@@ -109,8 +119,13 @@ export default function AdminDashboard() {
       })
       if (res.ok) {
         setUsers(prev => prev.map(u => u.id === userId ? { ...u, isVip: !currentVip } : u))
+        toast(`User VIP status updated`, 'success')
+      } else {
+        toast('Failed to update VIP status', 'error')
       }
-    } catch {}
+    } catch {
+      toast('Connection error', 'error')
+    }
   }
 
   const handleHotelSubmit = async (e: React.FormEvent) => {
@@ -134,21 +149,72 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload)
       })
       if (res.ok) {
+        toast(`Property ${editingHotel ? 'updated' : 'created'} successfully`, 'success')
         setShowHotelModal(false); setEditingHotel(null); loadData(token)
+      } else {
+        toast('Failed to save property', 'error')
       }
-    } catch {}
+    } catch {
+      toast('Connection error', 'error')
+    }
   }
 
   const deleteHotel = async (id: string) => {
     const token = localStorage.getItem('token')
-    if (!token || !confirm('Confirm deletion?')) return
+    if (!token) return
+
+    const isConfirmed = await confirm({
+      title: 'Delete Property',
+      message: 'Are you sure you want to permanently delete this luxury property and all associated data?',
+      confirmText: 'Delete',
+      variant: 'danger'
+    })
+
+    if (!isConfirmed) return
+
     try {
       const res = await fetch(`http://localhost:4000/hotels/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (res.ok) loadData(token)
-    } catch {}
+      if (res.ok) {
+        toast('Property deleted', 'success')
+        loadData(token)
+      } else {
+        toast('Failed to delete property', 'error')
+      }
+    } catch {
+      toast('Connection error', 'error')
+    }
+  }
+
+  const deleteComment = async (id: string) => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    const isConfirmed = await confirm({
+      title: 'Delete Comment',
+      message: 'Are you sure you want to remove this comment from the platform?',
+      confirmText: 'Delete',
+      variant: 'danger'
+    })
+
+    if (!isConfirmed) return
+
+    try {
+      const res = await fetch(`http://localhost:4000/room-comments/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        setComments(prev => prev.filter(c => c.id !== id))
+        toast('Comment deleted', 'success')
+      } else {
+        toast('Failed to delete comment', 'error')
+      }
+    } catch {
+      toast('Connection error', 'error')
+    }
   }
 
   if (!mounted) return null
@@ -221,7 +287,8 @@ export default function AdminDashboard() {
             {[
             { id: 'bookings', label: 'Bookings', count: bookings.length, icon: CreditCard },
             { id: 'hotels', label: 'Properties', count: hotels.length, icon: Building },
-            { id: 'users', label: 'Members', count: users.length, icon: Users }
+            { id: 'users', label: 'Members', count: users.length, icon: Users },
+            { id: 'comments', label: 'Comments', count: comments.length, icon: Bell }
           ].map((tab, i) => (
             <motion.button 
               key={tab.id}
@@ -340,7 +407,7 @@ export default function AdminDashboard() {
                     </div>
                  </motion.div>
                ))
-              )}
+               )}
             </div>
           ) : activeTab === 'hotels' ? (
             <div className="space-y-8">
@@ -353,6 +420,7 @@ export default function AdminDashboard() {
                   <Plus size={20} className="group-hover:scale-110 transition-transform" />
                   <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">Add Luxury Property</span>
                </motion.button>
+               
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {hotels.map((h, i) => (
                     <motion.div 
@@ -405,6 +473,43 @@ export default function AdminDashboard() {
                     </motion.div>
                   ))}
                </div>
+            </div>
+          ) : activeTab === 'comments' ? (
+            <div className="grid gap-4">
+               {comments.length === 0 ? (
+                 <div className="py-20 text-center text-muted-foreground uppercase text-[10px] font-black tracking-widest">No room comments found</div>
+               ) : (
+                 comments.map((c, i) => (
+                   <motion.div 
+                     key={c.id}
+                     initial={{ opacity: 0, x: -20 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     transition={{ delay: i * 0.05 }}
+                     className="p-6 bg-muted/30 border border-border rounded-xl flex justify-between items-center group"
+                   >
+                     <div className="flex items-center gap-6">
+                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-white font-black">
+                         {c.user?.name?.[0] || 'U'}
+                       </div>
+                       <div>
+                         <div className="flex items-center gap-2 mb-1">
+                           <span className="text-sm font-black">{c.user?.name || 'Anonymous'}</span>
+                           <span className="text-[8px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full font-black uppercase tracking-widest">Room: {c.room?.title}</span>
+                           <span className="text-[8px] text-muted-foreground uppercase tracking-widest font-bold">{c.room?.hotel?.title}</span>
+                         </div>
+                         <p className="text-xs text-foreground/80">{c.text}</p>
+                         <span className="text-[8px] text-muted-foreground uppercase tracking-widest mt-2 block">{new Date(c.createdAt).toLocaleString()}</span>
+                       </div>
+                     </div>
+                     <button 
+                       onClick={() => deleteComment(c.id)}
+                       className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                     >
+                       <Trash size={16} />
+                     </button>
+                   </motion.div>
+                 ))
+               )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -471,6 +576,7 @@ export default function AdminDashboard() {
                ))}
             </div>
           )}
+
         </div>
       </div>
 

@@ -7,7 +7,10 @@ import { Mail, Lock, User, UserPlus, Sparkles, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { HotelIcon } from '../../../components/HotelIcons'
 
+import { useToast } from '../../../lib/ToastContext'
+
 export default function RegisterPage() {
+  const { toast } = useToast()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,12 +32,17 @@ export default function RegisterPage() {
       
       const data = await res.json()
       if (data.user?.id || data.id) {
+        toast('Account created! Welcome to MCTJK.', 'success')
         router.push(`/auth/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`)
       } else {
-        setError(data.message || 'Registration failed')
+        const msg = data.message || 'Registration failed'
+        setError(msg)
+        toast(msg, 'error')
       }
     } catch (err) {
-      setError('Connection refused. Please check if the server is running.')
+      const msg = 'Connection refused. Please check if the server is running.'
+      setError(msg)
+      toast(msg, 'error')
     } finally {
       setLoading(false)
     }

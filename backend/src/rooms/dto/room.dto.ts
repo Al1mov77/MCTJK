@@ -14,6 +14,10 @@ export class CreateRoomDto {
   @IsArray()
   images: string[];
 
+  @ApiProperty({ example: 'Deluxe Suite' })
+  @IsString()
+  title: string;
+
   @ApiProperty({ example: 'Spacious deluxe room with king-size bed and city view' })
   @IsOptional()
   @IsString()

@@ -5,6 +5,7 @@ import VipAssistant from "../components/VipAssistant";
 import { LanguageProvider } from '../lib/LanguageContext';
 import { ThemeProvider } from '../lib/ThemeContext';
 import { Providers } from "../components/Providers";
+import { SmoothScrollProvider } from '../lib/SmoothScrollProvider';
 
 const outfit = Outfit({
   variable: "--font-outfit",

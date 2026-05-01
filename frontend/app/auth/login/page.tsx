@@ -7,7 +7,10 @@ import { Mail, Lock, ArrowRight, LogIn, ShieldCheck, Sparkles } from 'lucide-rea
 import Link from 'next/link'
 import { HotelIcon } from '../../../components/HotelIcons'
 
+import { useToast } from '../../../lib/ToastContext'
+
 function LoginContent() {
+  const { toast } = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,12 +41,17 @@ function LoginContent() {
       if (data.access_token) {
         localStorage.setItem('token', data.access_token)
         localStorage.setItem('user', JSON.stringify(data.user))
+        toast(`Welcome back, ${data.user.name}`, 'success')
         router.push('/hotels')
       } else {
-        setError(data.message || 'Authentication failed')
+        const msg = data.message || 'Authentication failed'
+        setError(msg)
+        toast(msg, 'error')
       }
     } catch (err) {
-      setError('Connection refused. Please check if the server is running.')
+      const msg = 'Connection refused. Please check if the server is running.'
+      setError(msg)
+      toast(msg, 'error')
     } finally {
       setLoading(false)
     }
