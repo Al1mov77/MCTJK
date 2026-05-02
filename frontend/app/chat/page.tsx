@@ -7,7 +7,7 @@ import { useLanguage } from '../../lib/LanguageContext'
 import { useTheme } from '../../lib/ThemeContext'
 import { ThemeToggle } from '../../components/ui/theme-toggle'
 import { cn } from '../../lib/utils'
-import { ConciergeIcon } from '../../components/HotelIcons'
+import { Star } from 'lucide-react'
 
 export default function ChatPage() {
   const { t, lang } = useLanguage()
@@ -27,17 +27,27 @@ export default function ChatPage() {
     if (stored) {
       const u = JSON.parse(stored)
       setUser(u)
-      loadContacts(token)
-    } else {
-      setContacts([{ id: 'official', name: 'Concierge', verified: true, online: true, role: 'ADMIN' }])
+      loadContacts(token, u)
     }
   }, [])
 
-  const loadContacts = async (token: string | null) => {
+  const loadContacts = async (token: string | null, currentUser: any) => {
     if (!token) return
     try {
       const res = await fetch('http://localhost:4000/chat/conversations', { headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) setContacts(await res.json())
+      if (res.ok) {
+        let data = await res.json()
+        
+        // Add VIP Members room if user is VIP
+        if (currentUser.isVip) {
+          data = [
+            { id: 'VIP_MEMBERS', name: 'VIP Members', isRoom: true, isVip: true },
+            ...data
+          ]
+        }
+        
+        setContacts(data)
+      }
     } catch {}
   }
 
@@ -45,11 +55,15 @@ export default function ChatPage() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages])
 
-  const loadMessages = async (contactId: string) => {
+  const loadMessages = async (contact: any) => {
     const token = localStorage.getItem('token')
     if (!token) return
     try {
-      const res = await fetch(`http://localhost:4000/chat/messages/${contactId}`, { headers: { Authorization: `Bearer ${token}` } })
+      const url = contact.isRoom 
+        ? `http://localhost:4000/chat/messages/${contact.id}?isRoom=true`
+        : `http://localhost:4000/chat/messages/${contact.id}`
+      
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       if (res.ok) setMessages(await res.json())
     } catch {
       setMessages([])
@@ -58,16 +72,20 @@ export default function ChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || !active) return
 
     const token = localStorage.getItem('token')
-    if (!token || !active) return
+    if (!token) return
 
     try {
       const res = await fetch('http://localhost:4000/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ receiverId: active.id, text: input }),
+        body: JSON.stringify({ 
+          receiverId: active.isRoom ? null : active.id, 
+          roomId: active.isRoom ? active.id : null,
+          text: input 
+        }),
       })
       if (res.ok) {
         const msg = await res.json()
@@ -80,112 +98,115 @@ export default function ChatPage() {
   if (!mounted) return null
 
   return (
-    <main className="h-screen bg-background flex overflow-hidden font-sans transition-colors duration-300">
+    <main className="h-screen bg-matte-charcoal flex overflow-hidden font-sans transition-colors duration-300">
       
-      {/* ── Modern Sidebar (Mobile Responsive) ── */}
+      {/* ── Sidebar ── */}
       <div className={cn(
-        "flex flex-col border-r border-border bg-muted/30 transition-all duration-300",
-        active ? 'hidden md:flex w-[350px]' : 'w-full md:w-[350px]'
+        "flex flex-col border-r border-white/5 bg-[#0a0a0a] transition-all duration-300",
+        active ? 'hidden md:flex w-[320px]' : 'w-full md:w-[320px]'
       )}>
-        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="p-8 space-y-8">
           <div className="flex justify-between items-center">
             <Link href="/" className="text-xl font-black tracking-tighter flex items-center gap-2 group">
-               <div className="w-5 h-5 bg-gradient-to-br from-amber-500 to-rose-500 rounded-sm transition-transform group-hover:scale-110" />
-               <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">MCTJK</span>
+               <div className="w-5 h-5 bg-[#d4af37] rounded-sm shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
+               <span className="text-[#d4af37]">MCTJK</span>
             </Link>
             <ThemeToggle />
           </div>
           <div className="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-            </svg>
             <input 
               type="text" 
-              placeholder="Search..."
-              className="w-full h-10 md:h-9 bg-muted border border-border rounded-lg pl-10 pr-4 text-xs font-medium outline-none focus:ring-1 focus:ring-foreground transition-all"
+              placeholder="SEARCH CONTACTS..."
+              className="w-full h-11 bg-white/[0.02] border border-white/5 rounded-xl pl-5 pr-4 text-[9px] font-black tracking-[0.3em] uppercase outline-none focus:border-[#d4af37]/30 transition-all placeholder:text-white/10"
             />
           </div>
         </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+          <div className="px-8 mb-4">
+             <h4 className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em]">Channels & Contacts</h4>
+          </div>
           {contacts.map((c, i) => (
-            <motion.button 
+            <button 
               key={c.id} 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              onClick={() => { setActive(c); loadMessages(c.id); }}
+              onClick={() => { setActive(c); loadMessages(c); }}
               className={cn(
-                "w-full px-4 py-4 md:py-3 flex items-center gap-3 text-left transition-all duration-300",
-                active?.id === c.id ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-lg' : 'hover:bg-amber-50 dark:hover:bg-amber-950/20'
+                "w-full px-8 py-5 flex items-center gap-4 text-left transition-all duration-300 relative group",
+                active?.id === c.id ? 'bg-[#d4af37]/5' : 'hover:bg-white/[0.01]'
               )}
             >
-              <div className={cn("w-12 h-12 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all duration-300", 
-                active?.id === c.id ? 'bg-white text-amber-600 shadow-lg' : 'bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 text-amber-700 dark:text-amber-300 border border-amber-200/50 dark:border-amber-700/50'
+              {active?.id === c.id && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1 bg-[#d4af37] shadow-[0_0_15px_#d4af37]" />}
+              
+              <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center text-xs font-black shrink-0 transition-all duration-500 border", 
+                c.isRoom ? 'bg-gold text-black border-gold' : 'bg-white/5 border-white/5 text-white/20'
               )}>
-                {c.role === 'ADMIN' ? <ConciergeIcon width={16} height={16} /> : (c.name ? c.name[0].toUpperCase() : (c.email ? c.email[0].toUpperCase() : 'C'))}
+                {c.isRoom ? <Star size={16} fill="currentColor" /> : (c.name ? c.name[0].toUpperCase() : 'C')}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className={cn("text-xs font-bold truncate uppercase tracking-wider transition-colors", 
-                    active?.id === c.id ? 'text-white' : 'text-foreground'
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className={cn("text-[11px] font-black truncate uppercase tracking-widest transition-colors", 
+                    active?.id === c.id ? 'text-[#d4af37]' : 'text-cream/80'
                   )}>
-                    {c.role === 'ADMIN' ? 'Elite Concierge' : (c.name || c.email?.split('@')[0])}
+                    {c.name}
                   </span>
-                  {c.online && (
-                    <div className={cn("w-2 h-2 rounded-full flex items-center justify-center", active?.id === c.id ? 'bg-white' : 'bg-green-500')}>
-                      <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
-                    </div>
-                  )}
+                  {c.isRoom && <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-pulse shadow-[0_0_8px_#d4af37]" />}
                 </div>
-                <p className={cn("text-[10px] truncate font-black uppercase tracking-widest transition-colors", 
-                  active?.id === c.id ? 'text-white/90' : 'text-muted-foreground'
-                )}>
-                   {c.role === 'ADMIN' ? '24/7 Premium Support' : 'VIP Member'}
+                <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-white/20">
+                   {c.isRoom ? 'Exclusive Room' : (c.isVip ? 'VIP Member' : 'Member')}
                 </p>
               </div>
-            </motion.button>
+            </button>
           ))}
-        </motion.div>
+        </div>
       </div>
 
-      {/* ── Chat Area (Mobile Responsive) ── */}
-      <div className={cn("flex-1 flex flex-col bg-background relative transition-all duration-300", active ? 'flex' : 'hidden md:flex')}>
+      {/* ── Chat Area ── */}
+      <div className={cn("flex-1 flex flex-col bg-[#050505] relative transition-all duration-300", active ? 'flex' : 'hidden md:flex')}>
         {active ? (
           <>
-            <header className="h-14 md:h-[65px] px-4 md:px-6 border-b border-amber-200/20 dark:border-amber-800/20 flex justify-between items-center bg-background/90 backdrop-blur-lg sticky top-0 z-10 shadow-lg">
-              <div className="flex items-center gap-3 md:gap-4">
-                <button onClick={() => setActive(null)} className="md:hidden p-2 -ml-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>
+            <header className="h-20 px-8 border-b border-white/5 flex justify-between items-center bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-10">
+              <div className="flex items-center gap-6">
+                <button onClick={() => setActive(null)} className="md:hidden p-2 -ml-2 text-[#d4af37]">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m15 18-6-6 6-6"/></svg>
                 </button>
-                <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-white text-[10px] font-bold shadow-lg">
-                      {active.role === 'ADMIN' ? <ConciergeIcon width={14} height={14} /> : (active.name ? active.name[0].toUpperCase() : (active.email ? active.email[0].toUpperCase() : 'C'))}
+                <div className="flex items-center gap-5">
+                   <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border", 
+                      active.isRoom ? 'bg-gold text-black border-gold' : 'bg-[#d4af37]/10 text-[#d4af37] border-[#d4af37]/20'
+                   )}>
+                      {active.isRoom ? <Star size={16} fill="currentColor" /> : (active.name ? active.name[0].toUpperCase() : 'C')}
                    </div>
                    <div>
-                     <h3 className="text-xs md:text-sm font-black tracking-tighter">
-                       <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">
-                         {active.role === 'ADMIN' ? 'Elite Concierge' : (active.name || active.email?.split('@')[0])}
-                       </span>
+                     <h3 className="text-sm font-black tracking-[0.2em] uppercase text-cream">
+                       {active.name}
                      </h3>
-                     <p className="text-[8px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.2em]">Premium Live Support</p>
+                     <div className="flex items-center gap-3 mt-1">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse shadow-[0_0_10px_#d4af37]" />
+                        <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em]">Direct Protocol Link</p>
+                     </div>
                    </div>
                 </div>
               </div>
             </header>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 custom-scrollbar pb-32">
-              <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 md:p-16 space-y-10 custom-scrollbar pb-40">
+              <div className="max-w-4xl mx-auto space-y-10">
                 {messages.map((m: any) => (
-                  <div key={m.id} className={cn("flex", m.senderId === user?.id ? 'justify-end' : 'justify-start')}>
+                  <div key={m.id} className={cn("flex flex-col", m.senderId === user?.id ? 'items-end' : 'items-start')}>
+                    {active.isRoom && m.senderId !== user?.id && (
+                       <span className="text-[7px] font-black text-gold uppercase tracking-[0.4em] mb-2 ml-1">
+                          {m.sender?.name || 'Sovereign'}
+                       </span>
+                    )}
                     <div className={cn(
-                      "max-w-[85%] md:max-w-[75%] px-4 py-3 md:py-2 rounded-2xl text-xs md:text-sm font-semibold shadow-sm transition-all duration-300",
+                      "max-w-[80%] md:max-w-[60%] px-7 py-4 rounded-2xl text-[12px] font-medium transition-all duration-500 shadow-2xl",
                       m.senderId === user?.id 
-                      ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-tr-none shadow-lg' 
-                      : 'bg-gradient-to-br from-muted to-amber-50 dark:from-muted dark:to-amber-950/20 border border-amber-200/30 dark:border-amber-800/30 text-foreground rounded-tl-none'
+                      ? 'bg-white text-black rounded-tr-none' 
+                      : 'bg-white/[0.03] border border-white/5 text-cream rounded-tl-none'
                     )}>
                       {m.text}
-                      <p className={cn("mt-1.5 text-[8px] font-black opacity-40 text-right uppercase tracking-[0.15em]")}>
+                      <p className={cn("mt-3 text-[7px] font-bold opacity-20 text-right uppercase tracking-[0.3em]", 
+                        m.senderId === user?.id ? 'text-black' : 'text-cream'
+                      )}>
                         {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -194,43 +215,42 @@ export default function ChatPage() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-border bg-background/80 backdrop-blur-md absolute bottom-0 w-full">
-              <div className="max-w-3xl mx-auto">
-                <form onSubmit={handleSend} className="flex gap-2 items-center bg-muted border border-border rounded-xl p-1 shadow-inner">
+            <div className="p-8 bg-[#050505]/80 backdrop-blur-xl border-t border-white/5 absolute bottom-0 w-full">
+              <div className="max-w-4xl mx-auto">
+                <form onSubmit={handleSend} className="flex gap-4 items-center bg-white/[0.01] border border-white/5 rounded-2xl p-2 focus-within:border-gold/30 transition-all">
                   <input 
                     value={input} 
                     onChange={e => setInput(e.target.value)} 
-                    className="flex-1 h-11 md:h-10 bg-transparent px-4 text-xs font-semibold outline-none placeholder:text-muted-foreground/50" 
-                    placeholder="Message..." 
+                    className="flex-1 h-12 bg-transparent px-6 text-[11px] font-black tracking-widest uppercase text-cream outline-none placeholder:text-white/5" 
+                    placeholder="ENTER TRANSMISSION..." 
                   />
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button 
                     type="submit" 
-                    className="h-11 md:h-10 px-6 md:px-8 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg transition-all"
+                    className="h-12 px-10 bg-white text-black hover:bg-gold hover:text-white rounded-xl text-[10px] font-black uppercase tracking-[0.4em] transition-all shadow-2xl active:scale-95"
                   >
-                    Send
-                  </motion.button>
+                    Transmit
+                  </button>
                 </form>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-gradient-to-br from-amber-50/20 to-rose-50/20 dark:from-amber-950/10 dark:to-rose-950/10">
-            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 max-w-sm">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 rounded-2xl flex items-center justify-center mx-auto shadow-lg border border-amber-200/50 dark:border-amber-700/50">
-                 <ConciergeIcon width={32} height={32} className="text-amber-600 dark:text-amber-400" />
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#050505]">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12 max-w-sm">
+              <div className="w-28 h-28 bg-gold/5 border border-gold/10 rounded-3xl flex items-center justify-center mx-auto relative group">
+                 <Star size={40} className="text-gold opacity-40 group-hover:scale-110 transition-transform" />
+                 <div className="absolute inset-0 rounded-3xl border border-gold/5 animate-pulse" />
               </div>
-              <div className="space-y-4">
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 rounded-full border border-amber-200/50 dark:border-amber-700/50">
-                   <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-                   <span className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-300">Premium Concierge</span>
-                </motion.div>
-                <h3 className="text-2xl font-black tracking-tighter">
-                   <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">Elite Support Terminal</span>
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-4 px-6 py-2.5 bg-gold/5 border border-gold/10 rounded-full">
+                   <div className="w-2 h-2 bg-gold rounded-full animate-pulse shadow-[0_0_10px_#d4af37]" />
+                   <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gold">Sovereign Authority</span>
+                </div>
+                <h3 className="text-4xl font-black tracking-tighter text-cream uppercase">
+                   Protocol <span className="text-gold">Link</span>
                 </h3>
-                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest leading-loose max-w-xs mx-auto">
-                  Connect with our luxury concierge team for personalized assistance and exclusive services.
+                <p className="text-[9px] text-white/20 font-bold uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto italic">
+                  Select a secure channel to begin encrypted transmission. VIP Members have automatic access to the Sovereign Core room.
                 </p>
               </div>
             </motion.div>

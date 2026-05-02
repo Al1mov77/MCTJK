@@ -10,7 +10,7 @@ interface VideoProps {
 }
 
 export default function NanoBananaVideo({ 
-  src = "/nano-video-intro.mp4",
+  src = "/grok-video-0f172a7a-3924-44bb-b502-55ad63b8e2fe (4).mp4",
   onProgress,
   onReady
 }: VideoProps) {
@@ -18,33 +18,44 @@ export default function NanoBananaVideo({
   const videoRef = useRef<HTMLVideoElement>(null)
   const isBuffering = useRef(false)
   const hasFinished = useRef(false)
+  
+  const onProgressRef = useRef(onProgress)
+  const onReadyRef = useRef(onReady)
+
+  useEffect(() => {
+    onProgressRef.current = onProgress
+    onReadyRef.current = onReady
+  }, [onProgress, onReady])
 
   useEffect(() => {
     const video = videoRef.current
     const canvas = canvasRef.current
     if (!video || !canvas) return
 
-    const ctx = canvas.getContext('2d', { alpha: false })
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true })
     const imageCache: HTMLImageElement[] = []
 
     const startBuffering = async () => {
       if (isBuffering.current || hasFinished.current) return
-      if (!video.duration || video.duration === 0 || !video.videoWidth) return
+      
+      const duration = video.duration
+      if (!duration || isNaN(duration)) return
 
       isBuffering.current = true
       
-      const duration = video.duration
-      const fps = 25 
-      const totalFrames = Math.floor(duration * fps)
+      // Calculate optimal frames (max 150 for performance/speed)
+      const targetFrames = Math.min(150, Math.floor(duration * 15))
+      const totalFrames = targetFrames
 
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      canvas.width = video.videoWidth || 1280 // Slightly lower res for faster buffering
+      canvas.height = video.videoHeight || 720
 
       try {
         for (let i = 0; i < totalFrames; i++) {
           const time = (i / totalFrames) * duration
           video.currentTime = time
           
+          // Wait for seek with a shorter timeout but retry logic
           await new Promise((resolve) => {
             const timeout = setTimeout(() => resolve(true), 1000)
             const onSeeked = () => {
@@ -55,21 +66,30 @@ export default function NanoBananaVideo({
             video.addEventListener('seeked', onSeeked)
           })
 
-          ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
-          const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', 0.6))
-          if (blob) {
-            const url = URL.createObjectURL(blob)
-            const img = new Image()
-            img.src = url
-            await new Promise(r => img.onload = r)
-            imageCache.push(img)
+          if (ctx) {
+             ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+             const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', 0.5))
+             if (blob) {
+               const url = URL.createObjectURL(blob)
+               const img = new Image() as HTMLImageElement
+               img.src = url
+               
+               if ('decode' in img) {
+                 await img.decode().catch(() => {})
+               } else {
+                 await new Promise(r => (img as any).onload = r)
+               }
+               imageCache.push(img)
+             }
           }
           
-          if (onProgress) onProgress(Math.round(((i + 1) / totalFrames) * 100))
+          if (onProgressRef.current) {
+            onProgressRef.current(Math.floor(((i + 1) / totalFrames) * 100))
+          }
         }
 
         hasFinished.current = true
-        if (onReady) onReady()
+        if (onReadyRef.current) onReadyRef.current()
 
         const sync = () => {
           const scrollY = window.pageYOffset || document.documentElement.scrollTop
@@ -91,30 +111,35 @@ export default function NanoBananaVideo({
           imageCache.forEach(img => URL.revokeObjectURL(img.src))
         }
       } catch (err) {
-        if (onReady) onReady()
+        if (onReadyRef.current) onReadyRef.current()
       }
     }
 
     const checkInterval = setInterval(() => {
-      if (!isBuffering.current && !hasFinished.current) startBuffering()
-    }, 300)
+      if (!isBuffering.current && !hasFinished.current) {
+         if (video.readyState >= 1) {
+            startBuffering()
+         } else {
+            // Force load if stuck
+            video.load()
+         }
+      }
+    }, 1000)
 
     video.addEventListener('loadedmetadata', startBuffering)
-    video.addEventListener('canplaythrough', startBuffering)
     if (video.readyState >= 1) startBuffering()
 
     return () => {
       clearInterval(checkInterval)
       video.removeEventListener('loadedmetadata', startBuffering)
-      video.removeEventListener('canplaythrough', startBuffering)
     }
-  }, [src]) // Удалил onProgress и onReady из зависимостей, чтобы избежать перезапуска!
+  }, [src])
 
   return (
-    <div className="fixed inset-0 w-full h-full z-[-1] bg-black overflow-hidden pointer-events-none transform-gpu">
+    <div className="fixed inset-0 w-full h-full z-0 bg-black overflow-hidden pointer-events-none transform-gpu">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover opacity-100 brightness-110" />
-      <video ref={videoRef} src={src} className="hidden" muted playsInline />
-      <div className="absolute inset-0 bg-black/10" />
+      <video ref={videoRef} src={src} className="hidden" muted playsInline preload="auto" />
+      <div className="absolute inset-0 bg-black/30" />
     </div>
   )
 }

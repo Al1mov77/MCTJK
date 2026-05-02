@@ -30,6 +30,7 @@ export class UsersController {
       select: {
         id: true, email: true, name: true, role: true, avatar: true,
         isVip: true, points: true, lastBonusAt: true,
+        coupons: { where: { isUsed: false } },
         _count: { select: { bookings: true } }
       },
     });
@@ -89,6 +90,13 @@ export class UsersController {
     // Auto-update VIP status
     if (bookingCount >= 10 && !user.isVip) {
       await this.prisma.user.update({ where: { id: req.user.id }, data: { isVip: true } as any });
+      // Issue 2 coupons
+      await this.prisma.coupon.createMany({
+        data: [
+          { userId: req.user.id, discount: 50 },
+          { userId: req.user.id, discount: 50 }
+        ]
+      });
     }
 
     return {
@@ -129,9 +137,23 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Toggle VIP status (Admin only)' })
   async toggleVip(@Param('id') id: string, @Body() dto: { isVip: boolean }) {
-    return this.prisma.user.update({
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    
+    const updated = await this.prisma.user.update({
       where: { id },
       data: { isVip: dto.isVip } as any,
     });
+
+    // If becoming VIP now, issue coupons
+    if (dto.isVip && !user.isVip) {
+      await this.prisma.coupon.createMany({
+        data: [
+          { userId: id, discount: 50 },
+          { userId: id, discount: 50 }
+        ]
+      });
+    }
+
+    return updated;
   }
 }

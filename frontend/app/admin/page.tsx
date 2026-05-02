@@ -228,180 +228,108 @@ export default function AdminDashboard() {
   )
 
   return (
-    <main className="min-h-screen bg-background transition-colors duration-300 font-sans">
-      
-      {/* ── Luxury Admin Header ── */}
-      <header className="fixed top-0 w-full z-[100] bg-background/90 backdrop-blur-lg border-b border-amber-200/20 dark:border-amber-800/20 shadow-lg h-14 md:h-16 flex items-center px-4 md:px-6">
-        <div className="container-tech flex justify-between items-center w-full">
-           <div className="flex items-center gap-3 md:gap-4">
-              <Link href="/" className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-950/20 rounded-full transition-colors group">
-                 <ArrowLeft size={16} className="text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
-              </Link>
-              <h1 className="text-sm md:text-base font-black tracking-normal flex items-center gap-2">
-                 <div className={cn(
-                    "w-4 h-4 md:w-5 md:h-5 rounded-sm transition-all duration-300",
-                    isDark 
-                      ? "bg-gradient-to-br from-amber-500 to-rose-500 shadow-lg" 
-                      : "bg-gradient-to-br from-amber-400 to-rose-400 shadow-xl shadow-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/40"
-                 )} />
-                 <span className={cn(
-                    "bg-clip-text text-transparent transition-all duration-300",
-                    isDark 
-                      ? "bg-gradient-to-r from-amber-600 to-rose-600" 
-                      : "bg-gradient-to-r from-amber-500 to-rose-500"
-                 )}>ADMIN CONTROL</span>
-              </h1>
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className={cn(
-                 "hidden md:inline-flex items-center gap-1.5 px-3 py-1 ml-2 rounded-full border transition-all duration-300",
-                 isDark 
-                   ? "bg-gradient-to-r from-amber-900/30 to-rose-900/30 border-amber-700/50" 
-                   : "bg-gradient-to-r from-amber-100 to-rose-100 border-amber-200/50 shadow-md shadow-amber-500/20"
-              )}>
-                 <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                 <span className={cn(
-                    "text-[7px] font-black uppercase tracking-widest transition-all duration-300",
-                    isDark 
-                      ? "text-amber-300" 
-                      : "text-amber-700"
-                 )}>ELITE ACCESS</span>
-              </motion.div>
-           </div>
-           <div className="flex items-center gap-3 md:gap-4">
-              <ThemeToggle />
-              <div className={cn(
-                 "w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300",
-                 isDark 
-                   ? "bg-gradient-to-br from-amber-600 to-rose-600 text-white shadow-lg shadow-amber-500/25" 
-                   : "bg-gradient-to-br from-amber-400 to-rose-400 text-white shadow-xl shadow-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/40"
-              )}>
-                 <Palette size={14} />
-              </div>
-           </div>
-        </div>
-      </header>
+    <main className="min-h-screen bg-[#050505] text-cream font-sans selection:bg-[#d4af37] selection:text-black relative">
+      {/* Editorial Atmosphere */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-[#d4af37]/5 blur-[150px] rounded-full" />
+      </div>
 
-      <div className="pt-24 md:pt-32 container-tech px-6 md:px-0">
+      <nav className="fixed top-0 w-full z-[100] h-20 bg-black/40 backdrop-blur-xl border-b border-white/5 flex items-center px-8 md:px-16 justify-between">
+        <Link href="/" className="flex items-center gap-4 group">
+          <div className="w-5 h-5 bg-[#d4af37] rounded-sm transition-transform group-hover:scale-110 shadow-[0_0_15px_#d4af37]" />
+          <span className="text-xl font-bold tracking-tighter text-[#d4af37]">MCTJK</span>
+        </Link>
+        <div className="flex items-center gap-10">
+          <ThemeToggle />
+          <div className="hidden md:block text-[9px] font-bold uppercase tracking-[0.5em] text-cream/20">Sovereign Authority</div>
+        </div>
+      </nav>
+
+      <div className="pt-40 md:pt-56 container-tech px-6 md:px-0 relative z-10">
+        <header className="mb-20 space-y-10">
+           <div className="flex items-center gap-6 text-[#d4af37] text-[10px] font-bold uppercase tracking-[0.6em]">
+              <span className="w-16 h-px bg-[#d4af37]/20" />
+              Sovereign Terminal
+           </div>
+           <h1 className="text-3xl md:text-5xl font-bold uppercase tracking-tighter italic leading-none text-white drop-shadow-2xl">
+              Admin <span className="text-[#d4af37]">Command</span>
+           </h1>
+           <p className="max-w-md text-[8px] md:text-[9px] font-bold uppercase tracking-[0.4em] text-cream/20 leading-relaxed italic">
+              Centralized administrative protocol for portfolio management, guest verification, and real-time transaction oversight.
+           </p>
+        </header>
         
         {/* ── Premium Tabs ── */}
-        <div className="flex gap-4 md:gap-8 mb-16 overflow-x-auto pb-4 no-scrollbar">
-            {[
-            { id: 'bookings', label: 'Bookings', count: bookings.length, icon: CreditCard },
-            { id: 'hotels', label: 'Properties', count: hotels.length, icon: Building },
-            { id: 'users', label: 'Members', count: users.length, icon: Users },
-            { id: 'comments', label: 'Comments', count: comments.length, icon: Bell }
-          ].map((tab, i) => (
-            <motion.button 
-              key={tab.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={cn(
-                "px-6 h-12 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap border shrink-0 flex items-center gap-2",
-                activeTab === tab.id 
-                  ? cn(
-                      "text-white border shadow-lg",
-                      isDark 
-                        ? "bg-gradient-to-r from-amber-500 to-rose-500 border-amber-500 shadow-amber-500/25" 
-                        : "bg-gradient-to-r from-amber-400 to-rose-400 border-amber-400 shadow-amber-400/30 shadow-xl"
-                    ) 
-                  : cn(
-                      "text-muted-foreground hover:border hover:bg",
-                      isDark 
-                        ? "border-amber-800/30 hover:border-amber-700/50 hover:text-amber-400 hover:bg-amber-950/20" 
-                        : "border-amber-200/50 hover:border-amber-300/70 hover:text-amber-600 hover:bg-amber-50/50 shadow-md hover:shadow-lg"
-                    )
-              )}
-            >
-              <tab.icon size={14} className={cn(
-                "transition-colors",
-                activeTab === tab.id 
-                  ? "text-white" 
-                  : isDark 
-                    ? "text-amber-400" 
-                    : "text-amber-500"
-              )} />
-              {tab.label} <span className={cn(
-                "ml-2 transition-opacity",
-                activeTab === tab.id 
-                  ? "opacity-80" 
-                  : "opacity-50"
-              )}>({tab.count})</span>
-            </motion.button>
-          ))}
+        <div className="flex items-center gap-2 p-1.5 bg-white/[0.02] border border-white/5 rounded-2xl w-max mb-20">
+           {[
+             { id: 'bookings', label: 'Bookings', count: bookings.length, icon: Calendar },
+             { id: 'hotels', label: 'Properties', count: hotels.length, icon: Building },
+             { id: 'users', label: 'Users', count: users.length, icon: Users },
+             { id: 'comments', label: 'Feedback', count: comments.length, icon: Bell }
+           ].map((tab) => (
+             <button 
+               key={tab.id}
+               onClick={() => setActiveTab(tab.id as any)}
+               className={cn(
+                 "px-6 h-11 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-3 relative overflow-hidden",
+                 activeTab === tab.id 
+                   ? "text-black" 
+                   : "text-cream/30 hover:text-white"
+               )}
+             >
+               {activeTab === tab.id && (
+                 <motion.div layoutId="activeTab" className="absolute inset-0 bg-[#d4af37]" />
+               )}
+               <span className="relative z-10 flex items-center gap-3">
+                 <tab.icon size={14} />
+                 {tab.label}
+                 <span className={cn("opacity-40 text-[8px]", activeTab === tab.id ? "text-black/60" : "")}>{tab.count}</span>
+               </span>
+             </button>
+           ))}
         </div>
 
-        <div className="space-y-12 pb-20">
+        <div className="space-y-12 pb-32">
           {loading ? (
-            <div className="py-40 text-center flex flex-col items-center gap-4">
-               <div className="w-6 h-6 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+            <div className="py-40 text-center flex flex-col items-center gap-6">
+               <div className="w-10 h-10 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#d4af37]/40">Synchronizing Data...</span>
             </div>
           ) : activeTab === 'bookings' ? (
             <div className="grid gap-6">
                {bookings.length === 0 ? (
-                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="py-40 text-center bg-gradient-to-br from-amber-50/20 to-rose-50/20 dark:from-amber-950/10 dark:to-rose-950/10 rounded-3xl border border-amber-200/30 dark:border-amber-800/30">
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 flex items-center justify-center border border-amber-200/50 dark:border-amber-700/50">
-                       <CreditCard size={32} className="text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <h3 className="text-2xl font-black tracking-tighter mb-2">No Active Bookings</h3>
-                    <p className="text-muted-foreground font-medium max-w-md mx-auto">All luxury bookings are currently managed</p>
-                 </motion.div>
+                 <div className="py-32 text-center glass-premium rounded-xl border border-dashed border-white/5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-cream/10 italic">No Active Bookings</p>
+                 </div>
                ) : (
                bookings.map((b, i) => (
-                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} key={b.id} className="relative overflow-hidden bg-gradient-to-br from-background to-muted border border-border rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 group">
-                    {/* Luxury Badge */}
-                    <div className="absolute top-4 left-4 z-10">
-                       <div className={cn(
-                          "px-3 py-1 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg",
-                          b.status === 'CONFIRMED' ? "bg-gradient-to-r from-green-500 to-emerald-500" : 
-                          b.status === 'CANCELLED' ? "bg-gradient-to-r from-red-500 to-rose-500" : 
-                          "bg-gradient-to-r from-amber-500 to-orange-500"
-                       )}>
-                          {b.status}
-                       </div>
-                    </div>
-                    
+                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={b.id} className="glass-premium border-white/5 rounded-xl shadow-xl overflow-hidden hover:border-[#d4af37]/20 transition-all duration-500">
                     <div className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-8">
-                       <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 rounded-2xl flex items-center justify-center text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-700/50 group-hover:scale-110 transition-transform duration-300">
+                       <div className="w-16 h-16 bg-white/[0.02] border border-white/5 rounded-lg flex items-center justify-center text-[#d4af37]/40 shrink-0">
                           <HotelIcon size={24} />
                        </div>
-                       <div className="flex-1 text-center md:text-left space-y-3">
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                             <h3 className="text-xl md:text-2xl font-black tracking-tighter group-hover:bg-gradient-to-r group-hover:from-amber-600 group-hover:to-rose-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">{b.room?.hotel?.title}</h3>
-                          </div>
-                          <div className="flex flex-wrap justify-center md:justify-start gap-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                             <span className="flex items-center gap-2 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full">
-                                <User size={10} /> {b.user?.name || 'Guest'}
-                             </span>
-                             <span className="flex items-center gap-2 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
-                                <Calendar size={10} /> {new Date(b.startDate).toLocaleDateString()}
-                             </span>
-                             <span className="flex items-center gap-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
-                                <span className="text-2xl font-black bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">${b.room?.price}</span>
-                                <span className="text-[8px]">Session</span>
-                             </span>
+                       <div className="flex-1 text-center md:text-left space-y-2">
+                          <h3 className="text-xl font-bold tracking-tight text-cream uppercase italic">{b.room?.hotel?.title}</h3>
+                          <div className="flex flex-wrap justify-center md:justify-start gap-6 text-[9px] font-bold text-cream/30 uppercase tracking-widest">
+                             <span className="flex items-center gap-2"><User size={12} /> {b.user?.name}</span>
+                             <span className="flex items-center gap-2"><Calendar size={12} /> {new Date(b.startDate).toLocaleDateString()}</span>
+                             <span className="text-[#d4af37]">${b.room?.price} Total</span>
                           </div>
                        </div>
-                       <div className="flex gap-2 w-full md:w-auto">
+                       <div className="flex items-center gap-4">
+                          <div className={cn(
+                             "px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded-sm",
+                             b.status === 'CONFIRMED' ? "bg-green-500/10 text-green-500" : 
+                             b.status === 'CANCELLED' ? "bg-red-500/10 text-red-500" : 
+                             "bg-[#d4af37]/10 text-[#d4af37]"
+                          )}>
+                             {b.status}
+                          </div>
                           {b.status === 'PENDING' && (
-                            <>
-                               <motion.button 
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleBookingActionClick(b.id, 'confirm')} 
-                                  className="flex-1 h-11 px-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-green-500/25 transition-all"
-                               >
-                                  Approve
-                               </motion.button>
-                               <motion.button 
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleBookingActionClick(b.id, 'cancel')} 
-                                  className="flex-1 h-11 px-6 border border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
-                               >
-                                  Reject
-                               </motion.button>
-                            </>
+                             <div className="flex gap-2">
+                                <button onClick={() => handleBookingActionClick(b.id, 'confirm')} className="h-10 px-4 bg-green-500 text-matte-charcoal rounded-sm text-[9px] font-bold uppercase tracking-widest hover:bg-green-600 transition-all">Approve</button>
+                                <button onClick={() => handleBookingActionClick(b.id, 'cancel')} className="h-10 px-4 bg-red-500 text-matte-charcoal rounded-sm text-[9px] font-bold uppercase tracking-widest hover:bg-red-600 transition-all">Reject</button>
+                             </div>
                           )}
                        </div>
                     </div>
@@ -411,168 +339,79 @@ export default function AdminDashboard() {
             </div>
           ) : activeTab === 'hotels' ? (
             <div className="space-y-8">
-               <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => { setEditingHotel(null); setHotelForm({ title: '', city: '', address: '', description: '', images: '', skills: '' }); setShowHotelModal(true); }} 
-                  className="w-full h-24 border-2 border-dashed border-amber-300/50 dark:border-amber-700/50 rounded-2xl flex items-center justify-center gap-4 text-amber-600 dark:text-amber-400 hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition-all uppercase text-[10px] font-black tracking-widest group"
-               >
-                  <Plus size={20} className="group-hover:scale-110 transition-transform" />
-                  <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">Add Luxury Property</span>
-               </motion.button>
+               <button onClick={() => { setEditingHotel(null); setHotelForm({ title: '', city: '', address: '', description: '', images: '', skills: '' }); setShowHotelModal(true); }} className="w-full h-24 border border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center gap-2 text-cream/20 hover:text-[#d4af37] hover:border-[#d4af37]/20 transition-all">
+                  <Plus size={24} />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Add New Property</span>
+               </button>
                
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {hotels.map((h, i) => (
-                    <motion.div 
-                       initial={{ opacity: 0, y: 20 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       transition={{ delay: i * 0.1 }}
-                       key={h.id} 
-                       className="relative overflow-hidden bg-gradient-to-br from-background to-muted border border-border rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 group"
-                    >
-                       {/* Luxury Badge */}
-                       <div className="absolute top-4 left-4 z-10">
-                          <div className="px-3 py-1 bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                             LUXURY
-                          </div>
+                    <div key={h.id} className="glass-premium border-white/5 rounded-xl overflow-hidden hover:border-[#d4af37]/20 transition-all duration-500 flex flex-col">
+                       <div className="relative aspect-video overflow-hidden">
+                          <SafeImage src={h.images?.[0]} fill className="object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60" />
                        </div>
-                       
-                       <div className="relative aspect-video rounded-t-2xl overflow-hidden">
-                          <SafeImage src={h.images?.[0]} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                       </div>
-                       
-                       <div className="p-6 space-y-4">
-                          <h3 className="text-xl font-black tracking-tighter group-hover:bg-gradient-to-r group-hover:from-amber-600 group-hover:to-rose-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">{h.title}</h3>
-                          
-                          <div className="flex items-center gap-2 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                             <MapPin size={10} className="text-amber-500" />
-                             {h.city}
+                       <div className="p-6 flex-1 flex flex-col justify-between gap-6">
+                          <div className="space-y-1">
+                             <h3 className="text-lg font-bold tracking-tight text-cream uppercase italic">{h.title}</h3>
+                             <div className="flex items-center gap-2 text-[8px] font-bold text-cream/20 uppercase tracking-widest">
+                                <MapPin size={10} /> {h.city}
+                             </div>
                           </div>
-                          
                           <div className="flex gap-2">
-                             <motion.button 
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => { setEditingHotel(h); setHotelForm({ title: h.title, city: h.city, address: h.address, description: h.description, images: h.images?.join('\n') || '', skills: h.skills?.join('\n') || '' }); setShowHotelModal(true); }} 
-                                className="flex-1 h-9 bg-gradient-to-r from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-[9px] font-black uppercase tracking-widest hover:from-amber-200 hover:to-rose-200 dark:hover:from-amber-800/50 dark:hover:to-rose-800/50 border border-amber-200/50 dark:border-amber-700/50 transition-all"
-                             >
-                                <Edit size={12} className="inline mr-1" />
-                                Edit
-                             </motion.button>
-                             <motion.button 
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => deleteHotel(h.id)} 
-                                className="w-9 h-9 border border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
-                             >
-                                <Trash size={14} />
-                             </motion.button>
+                             <button onClick={() => { setEditingHotel(h); setHotelForm({ title: h.title, city: h.city, address: h.address, description: h.description, images: h.images?.join('\n') || '', skills: h.skills?.join('\n') || '' }); setShowHotelModal(true); }} className="flex-1 h-9 bg-white/5 text-cream/60 rounded-sm text-[8px] font-bold uppercase tracking-widest hover:text-[#d4af37] transition-all">Edit</button>
+                             <button onClick={() => deleteHotel(h.id)} className="w-9 h-9 border border-red-500/10 text-red-500/20 rounded-sm flex items-center justify-center hover:bg-red-500 hover:text-matte-charcoal transition-all"><Trash size={14} /></button>
                           </div>
                        </div>
-                    </motion.div>
+                    </div>
                   ))}
                </div>
             </div>
           ) : activeTab === 'comments' ? (
             <div className="grid gap-4">
                {comments.length === 0 ? (
-                 <div className="py-20 text-center text-muted-foreground uppercase text-[10px] font-black tracking-widest">No room comments found</div>
+                 <div className="py-32 text-center text-cream/10 uppercase text-[9px] font-bold tracking-[0.4em] glass-premium rounded-xl border border-dashed border-white/5">No feedback entries</div>
                ) : (
                  comments.map((c, i) => (
-                   <motion.div 
-                     key={c.id}
-                     initial={{ opacity: 0, x: -20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     transition={{ delay: i * 0.05 }}
-                     className="p-6 bg-muted/30 border border-border rounded-xl flex justify-between items-center group"
-                   >
+                   <div key={c.id} className="p-6 glass-premium border-white/5 rounded-xl flex justify-between items-center group hover:border-[#d4af37]/20 transition-all duration-500">
                      <div className="flex items-center gap-6">
-                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-white font-black">
-                         {c.user?.name?.[0] || 'U'}
+                       <div className="w-10 h-10 rounded-sm bg-[#d4af37]/10 border border-[#d4af37]/20 flex items-center justify-center text-[#d4af37] font-bold text-sm">
+                         {c.user?.name?.[0] || 'S'}
                        </div>
-                       <div>
-                         <div className="flex items-center gap-2 mb-1">
-                           <span className="text-sm font-black">{c.user?.name || 'Anonymous'}</span>
-                           <span className="text-[8px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full font-black uppercase tracking-widest">Room: {c.room?.title}</span>
-                           <span className="text-[8px] text-muted-foreground uppercase tracking-widest font-bold">{c.room?.hotel?.title}</span>
+                       <div className="space-y-1">
+                         <div className="flex items-center gap-3">
+                           <span className="text-xs font-bold text-cream uppercase">{c.user?.name}</span>
+                           <span className="text-[7px] text-[#d4af37]/40 uppercase tracking-widest">@{c.room?.hotel?.title}</span>
                          </div>
-                         <p className="text-xs text-foreground/80">{c.text}</p>
-                         <span className="text-[8px] text-muted-foreground uppercase tracking-widest mt-2 block">{new Date(c.createdAt).toLocaleString()}</span>
+                         <p className="text-sm text-cream/50 font-light">{c.text}</p>
                        </div>
                      </div>
-                     <button 
-                       onClick={() => deleteComment(c.id)}
-                       className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all opacity-0 group-hover:opacity-100"
-                     >
-                       <Trash size={16} />
-                     </button>
-                   </motion.div>
+                     <button onClick={() => deleteComment(c.id)} className="p-2 text-red-500/10 hover:text-red-500 transition-all"><Trash size={18} /></button>
+                   </div>
                  ))
                )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {users.map((u, i) => (
-                 <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    key={u.id} 
-                    className="relative overflow-hidden bg-gradient-to-br from-background to-muted border border-border rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 group p-8"
-                 >
-                    {/* VIP Badge */}
-                    {u.isVip && (
-                       <div className="absolute top-4 right-4 z-10">
-                          <div className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg flex items-center gap-1">
-                             <Crown size={10} />
-                             VIP
-                          </div>
-                       </div>
-                    )}
-                    
-                    <div className="flex flex-col items-center text-center gap-6">
-                       <div className={cn(
-                          "w-16 h-16 rounded-full flex items-center justify-center text-xl font-black border-2 transition-all duration-300",
-                          u.isVip 
-                            ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-yellow-300 shadow-lg group-hover:scale-110" 
-                            : "bg-gradient-to-br from-amber-100 to-rose-100 dark:from-amber-900/30 dark:to-rose-900/30 text-amber-700 dark:text-amber-300 border-amber-200/50 dark:border-amber-700/50"
-                       )}>
-                          {u.name?.[0] || u.email?.[0]}
-                       </div>
-                       <div className="space-y-2">
-                          <h3 className="text-lg font-black tracking-tighter group-hover:bg-gradient-to-r group-hover:from-amber-600 group-hover:to-rose-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
-                             {u.name || u.email.split('@')[0]}
-                          </h3>
-                          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                             {u.role} · {u.points} Pts
-                          </p>
-                       </div>
-                       <motion.button 
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => toggleVip(u.id, u.isVip)} 
-                          className={cn(
-                             "w-full h-10 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border",
-                             u.isVip 
-                                ? "bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white border-yellow-300 shadow-lg shadow-yellow-500/25" 
-                                : "border-amber-200/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20"
-                          )}
-                       >
-                          {u.isVip ? (
-                             <>
-                                <Crown size={12} className="inline mr-1" />
-                                VIP Elite Active
-                             </>
-                          ) : (
-                             <>
-                                <Award size={12} className="inline mr-1" />
-                                Promote to VIP
-                             </>
-                          )}
-                       </motion.button>
+                 <div key={u.id} className="glass-premium border-white/5 rounded-xl p-8 flex flex-col items-center text-center gap-6 hover:border-[#d4af37]/20 transition-all">
+                    <div className={cn(
+                       "w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold border transition-all",
+                       u.isVip ? "bg-[#d4af37] text-matte-charcoal border-[#d4af37]" : "bg-white/5 border-white/5 text-cream/20"
+                    )}>
+                       {u.name?.[0] || u.email?.[0]}
                     </div>
-                 </motion.div>
+                    <div className="space-y-1">
+                       <h3 className="text-lg font-bold text-cream uppercase italic">{u.name || u.email.split('@')[0]}</h3>
+                       <p className="text-[8px] font-bold text-cream/10 uppercase tracking-widest">{u.role} // {u.points} PTS</p>
+                    </div>
+                    <button onClick={() => toggleVip(u.id, u.isVip)} className={cn(
+                       "w-full h-10 rounded-sm text-[8px] font-bold uppercase tracking-widest border transition-all",
+                       u.isVip ? "bg-[#d4af37] text-matte-charcoal border-[#d4af37]" : "bg-white/5 border-white/5 text-cream/40 hover:text-[#d4af37]"
+                    )}>
+                       {u.isVip ? 'Revoke VIP Status' : 'Grant VIP Status'}
+                    </button>
+                 </div>
                ))}
             </div>
           )}
@@ -581,80 +420,107 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── Modern Modal ── */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showHotelModal && (
-          <div className="fixed inset-0 z-[500] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowHotelModal(false)} className="absolute inset-0 bg-background/60 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-card border border-border rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl">
-               <div className="p-8 md:p-12">
-                  <header className="flex justify-between items-center mb-10">
-                     <h2 className="text-2xl font-black tracking-tighter uppercase">{editingHotel ? 'Edit Property' : 'New Property'}</h2>
-                     <button onClick={() => setShowHotelModal(false)} className="p-2 hover:bg-muted rounded-full"><XCircle size={24} /></button>
+          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowHotelModal(false)} className="absolute inset-0 bg-[#050505]/80 backdrop-blur-md" />
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+               animate={{ opacity: 1, scale: 1, y: 0 }} 
+               exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+               className="relative bg-[#0a0a0a] border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh]"
+            >
+               <div className="p-8 md:p-10 space-y-10">
+                  <header className="flex justify-between items-center">
+                     <div className="space-y-1">
+                        <h2 className="text-xl font-bold tracking-tight uppercase italic text-[#d4af37]">
+                           {editingHotel ? 'Edit Property' : 'New Property'}
+                        </h2>
+                        <div className="h-0.5 w-12 bg-[#d4af37]/30" />
+                     </div>
+                     <button onClick={() => setShowHotelModal(false)} className="p-2 text-cream/20 hover:text-white transition-colors"><XCircle size={24} /></button>
                   </header>
-                  <form onSubmit={handleHotelSubmit} className="space-y-6">
-                     <div className="grid grid-cols-2 gap-6">
+
+                  <form onSubmit={handleHotelSubmit} className="space-y-8">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Title</label>
-                           <input value={hotelForm.title} onChange={e => setHotelForm({...hotelForm, title: e.target.value})} className="w-full h-11 bg-muted border border-border rounded-lg px-4 text-sm font-semibold outline-none" required />
+                           <label className="text-[9px] font-bold uppercase tracking-widest text-cream/30 ml-1">Title</label>
+                           <input value={hotelForm.title} onChange={e => setHotelForm({...hotelForm, title: e.target.value})} className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-xs font-medium text-cream outline-none focus:border-[#d4af37]/30 transition-all" placeholder="E.g. Royal Palace" required />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">City</label>
-                           <input value={hotelForm.city} onChange={e => setHotelForm({...hotelForm, city: e.target.value})} className="w-full h-11 bg-muted border border-border rounded-lg px-4 text-sm font-semibold outline-none" required />
+                           <label className="text-[9px] font-bold uppercase tracking-widest text-cream/30 ml-1">City</label>
+                           <input value={hotelForm.city} onChange={e => setHotelForm({...hotelForm, city: e.target.value})} className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-xs font-medium text-cream outline-none focus:border-[#d4af37]/30 transition-all" placeholder="E.g. Dubai" required />
                         </div>
                      </div>
+
                      <div className="space-y-2">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Description</label>
-                        <textarea value={hotelForm.description} onChange={e => setHotelForm({...hotelForm, description: e.target.value})} className="w-full min-h-[100px] bg-muted border border-border rounded-lg p-4 text-sm font-semibold outline-none resize-none" required />
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-cream/30 ml-1">Description</label>
+                        <textarea value={hotelForm.description} onChange={e => setHotelForm({...hotelForm, description: e.target.value})} className="w-full min-h-[100px] bg-white/[0.03] border border-white/5 rounded-lg p-4 text-xs font-medium text-cream outline-none focus:border-[#d4af37]/30 transition-all resize-none" placeholder="Property overview..." required />
                      </div>
+
                      <div className="space-y-2">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Image URLs (one per line)</label>
-                        <textarea value={hotelForm.images} onChange={e => setHotelForm({...hotelForm, images: e.target.value})} className="w-full min-h-[100px] bg-muted border border-border rounded-lg p-4 text-sm font-semibold outline-none resize-none" required />
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-cream/30 ml-1">Image URLs (one per line)</label>
+                        <textarea value={hotelForm.images} onChange={e => setHotelForm({...hotelForm, images: e.target.value})} className="w-full min-h-[100px] bg-white/[0.03] border border-white/5 rounded-lg p-4 text-xs font-mono text-cream/60 outline-none focus:border-[#d4af37]/30 transition-all resize-none" placeholder="https://..." required />
                      </div>
-                     <button type="submit" className="apple-btn w-full h-14 mt-4 shadow-xl">Save Property</button>
+
+                     <button type="submit" className="w-full h-14 btn-sand rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-xl">
+                        {editingHotel ? 'Save Changes' : 'Initialize Property'}
+                     </button>
                   </form>
                </div>
             </motion.div>
           </div>
         )}
 
-        {/* ── Booking Action Modal ── */}
         {showBookingModal && (
-          <div className="fixed inset-0 z-[600] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBookingModal(false)} className="absolute inset-0 bg-background/60 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-card border border-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-               <div className="p-8 md:p-10">
-                  <header className="flex justify-between items-center mb-8">
-                     <h2 className="text-xl font-black tracking-tighter uppercase flex items-center gap-2">
-                        {bookingToUpdate?.action === 'confirm' ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />}
-                        {bookingToUpdate?.action === 'confirm' ? 'Confirm Booking' : 'Reject Booking'}
-                     </h2>
-                     <button onClick={() => setShowBookingModal(false)} className="p-2 hover:bg-muted rounded-full"><XCircle size={20} /></button>
+          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBookingModal(false)} className="absolute inset-0 bg-[#050505]/80 backdrop-blur-md" />
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.95 }} 
+               animate={{ opacity: 1, scale: 1 }} 
+               exit={{ opacity: 0, scale: 0.95 }} 
+               className="relative bg-[#0a0a0a] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+            >
+               <div className="p-8 md:p-10 space-y-8">
+                  <header className="flex justify-between items-center">
+                     <div className="flex items-center gap-4">
+                        <div className={cn(
+                           "p-3 rounded-lg",
+                           bookingToUpdate?.action === 'confirm' ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+                        )}>
+                           {bookingToUpdate?.action === 'confirm' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+                        </div>
+                        <h2 className="text-lg font-bold tracking-tight uppercase italic text-cream">
+                           {bookingToUpdate?.action === 'confirm' ? 'Confirm Booking' : 'Reject Booking'}
+                        </h2>
+                     </div>
+                     <button onClick={() => setShowBookingModal(false)} className="text-cream/20 hover:text-white transition-colors"><XCircle size={20} /></button>
                   </header>
                   
                   <div className="space-y-6">
                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                           {bookingToUpdate?.action === 'confirm' ? 'Personal Message (Optional)' : 'Reason for Rejection'}
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-cream/30 ml-1">
+                           {bookingToUpdate?.action === 'confirm' ? 'Note to Guest (Optional)' : 'Rejection Reason'}
                         </label>
                         <textarea 
                            value={bookingReason} 
                            onChange={e => setBookingReason(e.target.value)} 
-                           className="w-full min-h-[120px] bg-muted border border-border rounded-xl p-4 text-sm font-semibold outline-none resize-none focus:border-foreground/20 transition-colors" 
-                           placeholder={bookingToUpdate?.action === 'confirm' ? "e.g. We are looking forward to seeing you!" : "e.g. Sorry, the room is under maintenance."}
+                           className="w-full min-h-[120px] bg-white/[0.03] border border-white/5 rounded-lg p-4 text-xs font-medium text-cream outline-none focus:border-[#d4af37]/30 transition-all resize-none" 
+                           placeholder={bookingToUpdate?.action === 'confirm' ? "e.g. Welcome to MCTJK." : "e.g. Room maintenance active."}
                            required={bookingToUpdate?.action === 'cancel'}
                         />
                      </div>
                      
                      <div className="flex gap-4">
-                        <button onClick={() => setShowBookingModal(false)} className="flex-1 h-12 border border-border rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-colors">Cancel</button>
+                        <button onClick={() => setShowBookingModal(false)} className="flex-1 h-12 bg-white/5 rounded-lg text-[9px] font-bold uppercase tracking-widest text-cream/40 hover:bg-white/10 transition-all">Cancel</button>
                         <button 
                            onClick={() => bookingToUpdate && updateStatus(bookingToUpdate.id, bookingToUpdate.action, bookingReason)} 
                            className={cn(
-                              "flex-[2] h-12 rounded-lg text-[10px] font-black uppercase tracking-widest text-white transition-all shadow-lg shadow-black/10",
-                              bookingToUpdate?.action === 'confirm' ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+                              "flex-[2] h-12 rounded-lg text-[9px] font-bold uppercase tracking-widest text-matte-charcoal transition-all",
+                              bookingToUpdate?.action === 'confirm' ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
                            )}
                         >
-                           {bookingToUpdate?.action === 'confirm' ? 'Approve' : 'Reject'}
+                           {bookingToUpdate?.action === 'confirm' ? 'Confirm Access' : 'Reject Access'}
                         </button>
                      </div>
                   </div>
