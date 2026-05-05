@@ -27,7 +27,7 @@ export default function HotelsPage() {
     setMounted(true)
     const stored = localStorage.getItem('user')
     if (stored) setUser(JSON.parse(stored))
-    fetch('http://localhost:4000/hotels')
+    fetch(`http://localhost:4000/hotels?t=${Date.now()}`)
       .then(res => res.json())
       .then(data => setHotels(Array.isArray(data) ? data : []))
       .catch(() => setHotels([]))
@@ -37,7 +37,7 @@ export default function HotelsPage() {
   if (!mounted) return null
 
   return (
-    <main className="min-h-screen bg-background text-foreground font-sans relative overflow-x-hidden pb-40 transition-colors duration-500">
+    <main className="min-h-screen bg-background text-foreground font-sans relative overflow-x-hidden pb-20 transition-colors duration-500">
       
       {/* Editorial Nav */}
       <nav className="fixed top-0 w-full z-[100] h-20 px-6 md:px-16 flex items-center justify-between transition-all">
@@ -56,12 +56,12 @@ export default function HotelsPage() {
 
       <div className="pt-32 md:pt-48 container-tech px-6 md:px-16">
         
-        <header className="mb-24 space-y-8">
+        <header className="mb-16 space-y-8">
            <div className="flex items-center gap-4 text-gold text-[10px] font-black uppercase tracking-[0.8em]">
               <span className="w-16 h-px bg-gold/20" />
               Sovereign Protocol
            </div>
-           <h1 className="text-5xl md:text-9xl font-editorial font-bold leading-none text-foreground tracking-tighter uppercase italic">
+           <h1 className="text-4xl md:text-7xl font-editorial font-bold leading-none text-foreground tracking-tighter uppercase italic">
               Portfolio <span className="text-gold">Index</span>
            </h1>
            <p className="max-w-xl text-[11px] font-bold uppercase tracking-[0.4em] text-muted-foreground leading-relaxed opacity-40">
@@ -76,7 +76,7 @@ export default function HotelsPage() {
              ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
             {hotels.map((hotel, i) => (
               <motion.div
                 key={hotel.id}
@@ -100,7 +100,7 @@ export default function HotelsPage() {
                   <div className="absolute bottom-12 left-12 right-12 space-y-8">
                     <div className="space-y-3">
                        <div className="flex items-center justify-between">
-                          <h3 className="text-4xl font-editorial font-bold text-white leading-none tracking-tight uppercase italic">{hotel.title}</h3>
+                          <h3 className="text-2xl font-editorial font-bold text-white leading-none tracking-tight uppercase italic">{hotel.title}</h3>
                           <div className="flex items-center gap-1.5">
                              <StarIcon width={12} height={12} className="text-gold" />
                              <span className="text-xs font-black text-gold">{Number(hotel.rating || 5.0).toFixed(1)}</span>
@@ -112,7 +112,7 @@ export default function HotelsPage() {
                     <div className="flex items-center justify-between pt-8 border-t border-white/10">
                        <div className="space-y-1">
                           <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Starting Rate</span>
-                          <div className="text-3xl font-bold text-white tracking-tighter">${hotel.rooms?.[0]?.price || 770}</div>
+                          <div className="text-xl font-bold text-white tracking-tighter">${hotel.rooms?.[0]?.price || 770}</div>
                        </div>
                        <div className="w-14 h-14 rounded-[1.5rem] border border-white/20 flex items-center justify-center text-white/40 group-hover:bg-gold group-hover:text-black group-hover:border-gold transition-all duration-700 shadow-2xl">
                           <ArrowRight size={20} />

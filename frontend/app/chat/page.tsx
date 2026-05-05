@@ -98,18 +98,18 @@ export default function ChatPage() {
   if (!mounted) return null
 
   return (
-    <main className="h-screen bg-matte-charcoal flex overflow-hidden font-sans transition-colors duration-300">
+    <main className="h-screen bg-background text-foreground flex overflow-hidden font-sans transition-colors duration-300">
       
       {/* ── Sidebar ── */}
       <div className={cn(
-        "flex flex-col border-r border-white/5 bg-[#0a0a0a] transition-all duration-300",
+        "flex flex-col border-r border-border bg-card transition-all duration-300",
         active ? 'hidden md:flex w-[320px]' : 'w-full md:w-[320px]'
       )}>
         <div className="p-8 space-y-8">
           <div className="flex justify-between items-center">
             <Link href="/" className="text-xl font-black tracking-tighter flex items-center gap-2 group">
-               <div className="w-5 h-5 bg-[#d4af37] rounded-sm shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
-               <span className="text-[#d4af37]">MCTJK</span>
+               <div className="w-5 h-5 bg-gold rounded-sm shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
+               <span className="text-gold">MCTJK</span>
             </Link>
             <ThemeToggle />
           </div>
@@ -117,14 +117,14 @@ export default function ChatPage() {
             <input 
               type="text" 
               placeholder="SEARCH CONTACTS..."
-              className="w-full h-11 bg-white/[0.02] border border-white/5 rounded-xl pl-5 pr-4 text-[9px] font-black tracking-[0.3em] uppercase outline-none focus:border-[#d4af37]/30 transition-all placeholder:text-white/10"
+              className="w-full h-11 bg-muted border border-border rounded-xl pl-5 pr-4 text-[9px] font-black tracking-[0.3em] uppercase outline-none focus:border-gold/30 transition-all placeholder:text-muted-foreground/50"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
           <div className="px-8 mb-4">
-             <h4 className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em]">Channels & Contacts</h4>
+             <h4 className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.5em]">Channels & Contacts</h4>
           </div>
           {contacts.map((c, i) => (
             <button 
@@ -132,26 +132,26 @@ export default function ChatPage() {
               onClick={() => { setActive(c); loadMessages(c); }}
               className={cn(
                 "w-full px-8 py-5 flex items-center gap-4 text-left transition-all duration-300 relative group",
-                active?.id === c.id ? 'bg-[#d4af37]/5' : 'hover:bg-white/[0.01]'
+                active?.id === c.id ? 'bg-gold/5' : 'hover:bg-muted/50'
               )}
             >
-              {active?.id === c.id && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1 bg-[#d4af37] shadow-[0_0_15px_#d4af37]" />}
+              {active?.id === c.id && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1 bg-gold shadow-[0_0_15px_#d4af37]" />}
               
               <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center text-xs font-black shrink-0 transition-all duration-500 border", 
-                c.isRoom ? 'bg-gold text-black border-gold' : 'bg-white/5 border-white/5 text-white/20'
+                c.isRoom ? 'bg-gold text-black border-gold' : 'bg-muted border-border text-muted-foreground'
               )}>
                 {c.isRoom ? <Star size={16} fill="currentColor" /> : (c.name ? c.name[0].toUpperCase() : 'C')}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
                   <span className={cn("text-[11px] font-black truncate uppercase tracking-widest transition-colors", 
-                    active?.id === c.id ? 'text-[#d4af37]' : 'text-cream/80'
+                    active?.id === c.id ? 'text-gold' : 'text-foreground/80'
                   )}>
                     {c.name}
                   </span>
                   {c.isRoom && <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-pulse shadow-[0_0_8px_#d4af37]" />}
                 </div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-white/20">
+                <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
                    {c.isRoom ? 'Exclusive Room' : (c.isVip ? 'VIP Member' : 'Member')}
                 </p>
               </div>
@@ -161,22 +161,22 @@ export default function ChatPage() {
       </div>
 
       {/* ── Chat Area ── */}
-      <div className={cn("flex-1 flex flex-col bg-[#050505] relative transition-all duration-300", active ? 'flex' : 'hidden md:flex')}>
+      <div className={cn("flex-1 flex flex-col bg-background relative transition-all duration-300", active ? 'flex' : 'hidden md:flex')}>
         {active ? (
           <>
-            <header className="h-20 px-8 border-b border-white/5 flex justify-between items-center bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-10">
+            <header className="h-20 px-8 border-b border-border flex justify-between items-center bg-background/80 backdrop-blur-xl sticky top-0 z-10">
               <div className="flex items-center gap-6">
                 <button onClick={() => setActive(null)} className="md:hidden p-2 -ml-2 text-[#d4af37]">
                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m15 18-6-6 6-6"/></svg>
                 </button>
                 <div className="flex items-center gap-5">
                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border", 
-                      active.isRoom ? 'bg-gold text-black border-gold' : 'bg-[#d4af37]/10 text-[#d4af37] border-[#d4af37]/20'
+                      active.isRoom ? 'bg-gold text-black border-gold' : 'bg-gold/10 text-gold border-gold/20'
                    )}>
                       {active.isRoom ? <Star size={16} fill="currentColor" /> : (active.name ? active.name[0].toUpperCase() : 'C')}
                    </div>
                    <div>
-                     <h3 className="text-sm font-black tracking-[0.2em] uppercase text-cream">
+                     <h3 className="text-sm font-black tracking-[0.2em] uppercase text-foreground">
                        {active.name}
                      </h3>
                      <div className="flex items-center gap-3 mt-1">
@@ -200,12 +200,12 @@ export default function ChatPage() {
                     <div className={cn(
                       "max-w-[80%] md:max-w-[60%] px-7 py-4 rounded-2xl text-[12px] font-medium transition-all duration-500 shadow-2xl",
                       m.senderId === user?.id 
-                      ? 'bg-white text-black rounded-tr-none' 
-                      : 'bg-white/[0.03] border border-white/5 text-cream rounded-tl-none'
+                      ? 'bg-foreground text-background rounded-tr-none' 
+                      : 'bg-muted border border-border text-foreground rounded-tl-none'
                     )}>
                       {m.text}
                       <p className={cn("mt-3 text-[7px] font-bold opacity-20 text-right uppercase tracking-[0.3em]", 
-                        m.senderId === user?.id ? 'text-black' : 'text-cream'
+                        m.senderId === user?.id ? 'text-background' : 'text-foreground'
                       )}>
                         {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
@@ -215,18 +215,18 @@ export default function ChatPage() {
               </div>
             </div>
 
-            <div className="p-8 bg-[#050505]/80 backdrop-blur-xl border-t border-white/5 absolute bottom-0 w-full">
+            <div className="p-8 bg-background/80 backdrop-blur-xl border-t border-border absolute bottom-0 w-full">
               <div className="max-w-4xl mx-auto">
-                <form onSubmit={handleSend} className="flex gap-4 items-center bg-white/[0.01] border border-white/5 rounded-2xl p-2 focus-within:border-gold/30 transition-all">
+                <form onSubmit={handleSend} className="flex gap-4 items-center bg-muted/50 border border-border rounded-2xl p-2 focus-within:border-gold/30 transition-all">
                   <input 
                     value={input} 
                     onChange={e => setInput(e.target.value)} 
-                    className="flex-1 h-12 bg-transparent px-6 text-[11px] font-black tracking-widest uppercase text-cream outline-none placeholder:text-white/5" 
+                    className="flex-1 h-12 bg-transparent px-6 text-[11px] font-black tracking-widest uppercase text-foreground outline-none placeholder:text-muted-foreground/30" 
                     placeholder="ENTER TRANSMISSION..." 
                   />
                   <button 
                     type="submit" 
-                    className="h-12 px-10 bg-white text-black hover:bg-gold hover:text-white rounded-xl text-[10px] font-black uppercase tracking-[0.4em] transition-all shadow-2xl active:scale-95"
+                    className="h-12 px-10 bg-foreground text-background hover:bg-gold hover:text-white rounded-xl text-[10px] font-black uppercase tracking-[0.4em] transition-all shadow-2xl active:scale-95"
                   >
                     Transmit
                   </button>
@@ -235,7 +235,7 @@ export default function ChatPage() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#050505]">
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-background">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-12 max-w-sm">
               <div className="w-28 h-28 bg-gold/5 border border-gold/10 rounded-3xl flex items-center justify-center mx-auto relative group">
                  <Star size={40} className="text-gold opacity-40 group-hover:scale-110 transition-transform" />
@@ -246,10 +246,10 @@ export default function ChatPage() {
                    <div className="w-2 h-2 bg-gold rounded-full animate-pulse shadow-[0_0_10px_#d4af37]" />
                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gold">Sovereign Authority</span>
                 </div>
-                <h3 className="text-4xl font-black tracking-tighter text-cream uppercase">
+                <h3 className="text-4xl font-black tracking-tighter text-foreground uppercase">
                    Protocol <span className="text-gold">Link</span>
                 </h3>
-                <p className="text-[9px] text-white/20 font-bold uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto italic">
+                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.4em] leading-relaxed max-w-xs mx-auto italic">
                   Select a secure channel to begin encrypted transmission. VIP Members have automatic access to the Sovereign Core room.
                 </p>
               </div>

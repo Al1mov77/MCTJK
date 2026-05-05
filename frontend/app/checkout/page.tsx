@@ -24,6 +24,8 @@ function CheckoutContent() {
   
   const [loading, setLoading] = useState(false)
   const [room, setRoom] = useState<any>(null)
+  const [user, setUser] = useState<any>(null)
+  const [days, setDays] = useState(1)
   const [spinnerHistory, setSpinnerHistory] = useState<any[]>([])
   const [selectedDiscount, setSelectedDiscount] = useState<any>(null)
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' })
@@ -32,6 +34,9 @@ function CheckoutContent() {
     if (!roomId) router.push('/hotels')
     const token = localStorage.getItem('token')
     if (!token) router.push('/auth/login')
+
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) setUser(JSON.parse(storedUser))
 
     fetch(`http://localhost:4000/rooms/${roomId}`)
       .then(res => res.json())
@@ -42,9 +47,10 @@ function CheckoutContent() {
     setSpinnerHistory(history.filter((h: any) => typeof h.value === 'number' && h.value > 0 && !h.used))
   }, [roomId, router])
 
-  const totalPrice = room ? room.price * 3 : 0
-  const discountAmount = selectedDiscount ? (totalPrice * selectedDiscount.value) / 100 : 0
-  const finalPrice = totalPrice - discountAmount
+  const basePrice = room ? room.price * days : 0
+  const vipDiscount = user?.isVip ? basePrice * 0.1 : 0
+  const couponDiscount = selectedDiscount ? (basePrice * selectedDiscount.value) / 100 : 0
+  const finalPrice = basePrice - vipDiscount - couponDiscount
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,7 +64,7 @@ function CheckoutContent() {
         body: JSON.stringify({
           roomId,
           startDate: new Date().toISOString(),
-          endDate: new Date(Date.now() + 86400000 * 3).toISOString()
+          endDate: new Date(Date.now() + 86400000 * days).toISOString()
         })
       })
 
@@ -71,7 +77,7 @@ function CheckoutContent() {
           localStorage.setItem('spinner_history', JSON.stringify(updatedHistory))
         }
 
-        toast(lang === 'ru' ? 'Payment processed! Awaiting approval.' : 'Payment processed! Awaiting admin approval.', 'success')
+        toast(lang === 'ru' ? 'Бронирование завершено! Ожидайте подтверждения.' : 'Booking completed! Awaiting admin approval.', 'success')
         router.push('/profile')
       } else {
         const errData = await res.json()
@@ -95,13 +101,35 @@ function CheckoutContent() {
       <div className="lg:col-span-7 space-y-12 relative z-10">
         <header className="space-y-6">
            <Link href={`/hotels`} className="inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#d4af37]/40 hover:text-[#d4af37] transition-all">
-              <ChevronLeft size={16} /> {lang === 'ru' ? 'Back to Collection' : 'Back to Collection'}
+              <ChevronLeft size={16} /> {lang === 'ru' ? 'Назад' : 'Back to Collection'}
            </Link>
            <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-cream">
               Secure <span className="text-[#d4af37]">Protocol.</span>
            </h1>
            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#d4af37]/20">Sovereign Authorization Required</p>
         </header>
+
+        {/* DURATION SELECTOR */}
+        <div className="space-y-6">
+          <label className="text-[10px] font-black uppercase tracking-[0.4em] text-[#d4af37]/50 ml-1">Protocol Duration (Days)</label>
+          <div className="grid grid-cols-3 gap-4">
+            {[1, 2, 3].map(d => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDays(d)}
+                className={cn(
+                  "h-16 rounded-xl border text-xs font-black transition-all flex items-center justify-center gap-3",
+                  days === d 
+                    ? "bg-[#d4af37] text-black border-[#d4af37] shadow-[0_0_20px_rgba(212,175,55,0.3)]" 
+                    : "bg-white/[0.02] border-white/5 text-white/30 hover:border-[#d4af37]/20"
+                )}
+              >
+                {d} {d === 1 ? 'DAY' : 'DAYS'}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <form onSubmit={handlePay} className="glass-premium p-10 md:p-16 rounded-2xl shadow-2xl space-y-10">
            <div className="space-y-8">
@@ -187,17 +215,23 @@ function CheckoutContent() {
             <div className="pt-10 border-t border-white/5 space-y-5">
                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em]">
                   <span className="text-white/30">Protocol Duration</span>
-                  <span className="text-cream flex items-center gap-3"><Calendar size={14} className="text-[#d4af37]" /> 3 Sovereign Days</span>
+                  <span className="text-cream flex items-center gap-3"><Calendar size={14} className="text-[#d4af37]" /> {days} Sovereign Days</span>
                </div>
                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em]">
                   <span className="text-white/30">Base Access Rate</span>
-                  <span className="text-cream">${totalPrice}</span>
+                  <span className="text-cream">${basePrice}</span>
                </div>
+               {user?.isVip && (
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-[#d4af37]">
+                    <span className="opacity-60">VIP Sovereign Discount (10%)</span>
+                    <span>-${vipDiscount}</span>
+                  </div>
+               )}
             </div>
 
             {/* DISCOUNT SELECTOR */}
             <div className="pt-10 border-t border-white/5 space-y-6">
-               <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d4af37]/50 block">Neural Rewards Vault</label>
+               <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d4af37]/50 block">Neural Rewards Vault</label>
                {spinnerHistory.length === 0 ? (
                   <div className="text-[10px] uppercase tracking-[0.2em] text-white/10 font-medium italic">No verified rewards found in vault</div>
                ) : (
@@ -205,6 +239,7 @@ function CheckoutContent() {
                      {spinnerHistory.map((h, i) => (
                         <button 
                           key={i}
+                          type="button"
                           onClick={() => setSelectedDiscount(selectedDiscount?.date === h.date ? null : h)}
                           className={cn(
                              "w-full p-5 rounded-lg border text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-between transition-all duration-500",
@@ -225,7 +260,7 @@ function CheckoutContent() {
                <div className="flex justify-between items-end">
                   <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/30 pb-2">Grand Authorization Total</span>
                   <div className="text-right">
-                     {selectedDiscount && <div className="text-[11px] text-[#d4af37] line-through opacity-40 mb-1">${totalPrice}</div>}
+                     {(selectedDiscount || user?.isVip) && <div className="text-[11px] text-[#d4af37] line-through opacity-40 mb-1">${basePrice}</div>}
                      <div className="text-5xl font-bold tracking-tighter text-[#d4af37]">${finalPrice}</div>
                   </div>
                </div>

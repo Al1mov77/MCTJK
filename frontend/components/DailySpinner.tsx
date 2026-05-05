@@ -66,7 +66,7 @@ export default function DailySpinner() {
     <div className="relative w-full max-w-md mx-auto text-center space-y-12">
       <div className="space-y-4">
         <h2 className="text-4xl font-bold tracking-tighter uppercase italic">{t.home.spinnerTitle || 'Sovereign Wheel'}</h2>
-        <p className="text-[10px] uppercase tracking-[0.4em] text-white/40">{t.home.spinnerSub || 'Test your neural luck once per day'}</p>
+        <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">{t.home.spinnerSub || 'Test your neural luck once per day'}</p>
       </div>
 
       <div className="relative aspect-square max-w-[280px] md:max-w-none mx-auto">
@@ -75,7 +75,7 @@ export default function DailySpinner() {
         <div className="absolute inset-2 md:inset-4 border border-white/10 rounded-full" />
         
         {/* The Wheel */}
-        <div className="spinner-wheel relative w-full h-full rounded-full border border-white/20 overflow-hidden shadow-2xl bg-black/40 backdrop-blur-xl">
+        <div className="spinner-wheel relative w-full h-full rounded-full border border-border overflow-hidden shadow-2xl bg-card/40 backdrop-blur-xl">
            {prizes.map((p, i) => (
              <div 
                key={i} 
@@ -99,7 +99,7 @@ export default function DailySpinner() {
         <button 
           onClick={spin}
           disabled={isSpinning || hasSpunToday}
-          className="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 rounded-full bg-white text-black z-30 font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-2xl active:scale-95 disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40 transition-all border-2 md:border-4 border-black"
+          className="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 rounded-full bg-foreground text-background z-30 font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-2xl active:scale-95 disabled:opacity-50 disabled:bg-muted disabled:text-muted-foreground transition-all border-2 md:border-4 border-background"
         >
           {isSpinning ? '...' : hasSpunToday ? 'Used' : 'Spin'}
         </button>
@@ -116,8 +116,8 @@ export default function DailySpinner() {
                 <CheckCircle2 size={32} />
                 <h3 className="text-3xl font-bold uppercase tracking-tighter">Winner</h3>
              </div>
-             <p className="text-[11px] uppercase tracking-[0.3em] font-bold text-white/60 mb-6">
-                You have received: <span className="text-white">{result}</span>
+             <p className="text-[11px] uppercase tracking-[0.3em] font-bold text-muted-foreground mb-6">
+                You have received: <span className="text-foreground">{result}</span>
              </p>
              <div className="text-[8px] uppercase tracking-widest text-amber-500/40">Reward stored in your neural profile</div>
           </motion.div>

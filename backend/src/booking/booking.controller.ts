@@ -43,7 +43,12 @@ export class BookingController {
 
   @Patch(':id/cancel')
   @ApiOperation({ summary: 'Cancel booking' })
-  cancel(@Param('id') id: string, @Body() dto: UpdateBookingStatusDto) {
+  async cancel(@Req() req, @Param('id') id: string, @Body() dto: UpdateBookingStatusDto) {
+    // Basic ownership check for non-admins
+    const booking = await this.bookingService.findOne(id);
+    if (req.user.role !== 'ADMIN' && booking.userId !== req.user.id) {
+      throw new Error('Unauthorized');
+    }
     return this.bookingService.updateStatus(id, 'CANCELLED', dto.reason);
   }
 }

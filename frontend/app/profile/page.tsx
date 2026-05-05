@@ -12,10 +12,14 @@ import { useLanguage } from '../../lib/LanguageContext'
 import { useTheme } from '../../lib/ThemeContext'
 import { cn } from '../../lib/utils'
 import { ThemeToggle } from '../../components/ui/theme-toggle'
+import { useConfirm } from '../../lib/ConfirmContext'
+import { useToast } from '../../lib/ToastContext'
 
 export default function ProfilePage() {
   const { lang, setLang, t } = useLanguage()
   const { isDark } = useTheme()
+  const { confirm } = useConfirm()
+  const { toast } = useToast()
   const [user, setUser] = useState<any>(null)
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -87,13 +91,12 @@ export default function ProfilePage() {
         setEditing(false)
         setShowPasswordForm(false)
         setPassword('')
-        setStatusMsg({ type: 'success', text: 'Profile updated' })
-        setTimeout(() => setStatusMsg(null), 3000)
+        toast('Profile identity updated', 'success')
       } else {
-        setStatusMsg({ type: 'error', text: 'Update failed' })
+        toast('Update failed', 'error')
       }
     } catch (err) {
-      setStatusMsg({ type: 'error', text: 'Network error' })
+      toast('Network error', 'error')
     }
   }
 
@@ -101,6 +104,37 @@ export default function ProfilePage() {
     localStorage.removeItem('user')
     localStorage.removeItem('token')
     router.push('/')
+  }
+
+  const handleCancelBooking = async (bookingId: string) => {
+    const isConfirmed = await confirm({
+      title: 'Abort Protocol',
+      message: 'Are you sure you want to terminate this active booking transmission?',
+      confirmText: 'Abort Access',
+      variant: 'danger'
+    })
+
+    if (!isConfirmed) return
+
+    const token = localStorage.getItem('token')
+    try {
+      const res = await fetch(`http://localhost:4000/booking/${bookingId}/cancel`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ reason: 'User terminated' })
+      })
+      if (res.ok) {
+        toast('Booking access terminated', 'success')
+        fetchBookings(token!)
+      } else {
+        toast('Termination failed', 'error')
+      }
+    } catch {
+      toast('Connection error', 'error')
+    }
   }
 
   if (loading || !user) {
@@ -258,7 +292,17 @@ export default function ProfilePage() {
                                 </div>
                              </div>
                           </div>
-                          <Link href={`/hotels/${b.room?.hotel?.id}`} className="text-[8px] font-bold uppercase tracking-widest text-gold hover:underline">View</Link>
+                           <div className="flex items-center gap-4">
+                              <Link href={`/hotels/${b.room?.hotel?.id}`} className="text-[8px] font-bold uppercase tracking-widest text-gold hover:underline">View</Link>
+                              {b.status !== 'CANCELLED' && (
+                                <button 
+                                  onClick={() => handleCancelBooking(b.id)}
+                                  className="text-[8px] font-bold uppercase tracking-widest text-red-500 hover:underline"
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                           </div>
                        </div>
                      ))
                    )}
@@ -267,12 +311,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
-
-      {statusMsg && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="fixed bottom-12 left-1/2 -translate-x-1/2 px-8 py-3 bg-foreground text-background rounded-full text-[10px] font-bold uppercase tracking-widest shadow-2xl z-[500]">
-           {statusMsg.text}
-        </motion.div>
-      )}
     </div>
   )
 }

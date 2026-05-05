@@ -26,6 +26,10 @@ export class BookingService {
   async create(userId: string, dto: CreateBookingDto) {
     const { roomId, startDate, endDate } = dto;
 
+    const admin = await this.prisma.user.findFirst({
+      where: { role: 'ADMIN' }
+    });
+
     const room = await this.prisma.room.findUnique({
       where: { id: roomId },
       include: { hotel: true }
@@ -67,7 +71,8 @@ export class BookingService {
       },
     });
 
-    await this.sendBotMessage(userId, `🛎 New Booking Request for ${room.hotel.title}. Status: PENDING. Our team will review it shortly.`);
+    const ownerName = admin?.name || 'MCTJK Owner';
+    await this.sendBotMessage(userId, `✨ Привет! Я владелец ${room.hotel.title}. Ваша бронь успешно завершена и ожидает моего личного подтверждения. \n\nМы подготовим все к вашему прибытию! 🥂`);
 
     return booking;
   }
@@ -121,6 +126,15 @@ export class BookingService {
     
     await this.sendBotMessage(booking.userId, message);
 
+    return booking;
+  }
+
+  async findOne(id: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id },
+      include: { room: { include: { hotel: true } } }
+    });
+    if (!booking) throw new NotFoundException('Booking not found');
     return booking;
   }
 }

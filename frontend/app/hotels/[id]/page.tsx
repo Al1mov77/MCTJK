@@ -26,6 +26,7 @@ export default function HotelDetailPage() {
   const [user, setUser] = useState<any>(null)
   const [ratingHover, setRatingHover] = useState(0)
   const [isSubmittingRating, setIsSubmittingRating] = useState(false)
+  const [activeImg, setActiveImg] = useState(0)
 
   useEffect(() => {
     setMounted(true)
@@ -39,10 +40,18 @@ export default function HotelDetailPage() {
     if (params.id) {
       fetch(`http://localhost:4000/hotels/${params.id}`)
         .then(res => res.json())
-        .then(data => setHotel(data))
+        .then(data => {
+          setHotel(data)
+          // Pre-parse images if they come as string
+          if (typeof data.images === 'string') {
+            data.images = JSON.parse(data.images)
+          }
+        })
         .finally(() => setLoading(false))
     }
   }
+
+  const hotelImages = Array.isArray(hotel?.images) ? hotel.images : []
 
   const handleBook = (roomId: string) => {
     const token = localStorage.getItem('token')
@@ -118,27 +127,44 @@ export default function HotelDetailPage() {
 
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] pt-16">
         
-        {/* LEFT: Balanced Visual Frame */}
-        <div className="lg:w-1/2 lg:h-[calc(100vh-64px)] lg:sticky lg:top-16 p-6 md:p-12 lg:p-16 flex items-center justify-center">
-           <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1 }}
-              className="relative w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl border border-border group bg-muted"
-           >
-              <SafeImage src={hotel.images?.[0]} fill className="object-cover group-hover:scale-105 transition-transform duration-[5s]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              
-              <div className="absolute bottom-8 left-8">
-                 <div className="px-4 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 text-white text-[9px] font-bold uppercase tracking-[0.4em] rounded-sm">
-                    {hotel.city}
-                 </div>
-              </div>
-           </motion.div>
+        {/* LEFT: Balanced Visual Frame with Slider */}
+        <div className="lg:w-[40%] lg:h-[calc(100vh-64px)] lg:sticky lg:top-16 p-6 md:p-12 lg:pl-16 lg:pr-8 flex items-center justify-center">
+            <div className="relative w-full aspect-[4/5] space-y-6">
+               <motion.div 
+                  key={activeImg}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="relative w-full h-[85%] rounded-[2.5rem] overflow-hidden shadow-2xl border border-border group bg-muted"
+               >
+                  <SafeImage src={hotelImages[activeImg]} fill className="object-cover group-hover:scale-105 transition-transform duration-[5s]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  
+                  <div className="absolute bottom-8 left-8">
+                     <div className="px-4 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 text-white text-[9px] font-bold uppercase tracking-[0.4em] rounded-sm">
+                        {hotel.city}
+                     </div>
+                  </div>
+               </motion.div>
+
+               {/* SLIDER DOTS */}
+               <div className="flex justify-center items-center gap-3">
+                  {hotelImages.map((_: string, idx: number) => (
+                     <button
+                        key={idx}
+                        onClick={() => setActiveImg(idx)}
+                        className={cn(
+                           "h-1.5 transition-all duration-500 rounded-full",
+                           activeImg === idx ? "w-8 bg-gold" : "w-1.5 bg-border hover:bg-gold/40"
+                        )}
+                     />
+                  ))}
+               </div>
+            </div>
         </div>
 
         {/* RIGHT: Elegant Scrolling Details */}
-        <div className="lg:w-1/2 p-6 md:p-12 lg:p-16 space-y-20 flex flex-col justify-center">
+        <div className="lg:w-[60%] p-6 md:p-12 lg:pl-8 lg:pr-16 space-y-12 flex flex-col justify-center">
            
            <header className="space-y-8">
               <div className="flex justify-between items-center">
@@ -174,7 +200,7 @@ export default function HotelDetailPage() {
               </div>
 
               <div className="space-y-4">
-                 <h1 className="text-5xl md:text-7xl font-editorial font-medium leading-[1.1] text-foreground tracking-tighter uppercase italic">
+                 <h1 className="text-4xl md:text-5xl font-editorial font-medium leading-[1.1] text-foreground tracking-tighter uppercase italic">
                     {hotel.title}
                  </h1>
                  <p className="text-[10px] font-medium uppercase tracking-[0.4em] text-muted-foreground flex items-center gap-3">
@@ -186,7 +212,7 @@ export default function HotelDetailPage() {
 
            <section className="space-y-8">
               <h3 className="text-[10px] font-bold uppercase tracking-[0.5em] text-muted-foreground/30">The Context</h3>
-              <p className="text-xl md:text-2xl font-editorial font-light leading-relaxed text-foreground/70 tracking-tight italic border-l border-gold/20 pl-8">
+              <p className="text-lg md:text-xl font-editorial font-light leading-relaxed text-foreground/70 tracking-tight italic border-l border-gold/20 pl-8">
                  {hotel.description}
               </p>
            </section>
@@ -194,14 +220,14 @@ export default function HotelDetailPage() {
            <section className="space-y-8">
               <h3 className="text-[10px] font-bold uppercase tracking-[0.5em] text-muted-foreground/30">Allocation</h3>
               {primaryRoom ? (
-                 <div className="p-10 bg-card border border-border rounded-[2.5rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-10 hover:border-gold/30 transition-all group">
+                 <div className="p-8 bg-card border border-border rounded-[2.5rem] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-gold/30 transition-all group">
                     <div className="space-y-2">
-                       <h4 className="text-3xl font-editorial font-medium italic text-foreground tracking-tight">{primaryRoom.title}</h4>
+                       <h4 className="text-xl font-editorial font-medium italic text-foreground tracking-tight">{primaryRoom.title}</h4>
                        <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Sovereign Protocol // Elite</div>
                     </div>
                     <div className="flex flex-col md:items-end gap-4 min-w-[200px]">
                        <div className="text-right">
-                          <div className="text-3xl font-bold tracking-tighter text-foreground">${primaryRoom.price}</div>
+                          <div className="text-xl font-bold tracking-tighter text-foreground">${primaryRoom.price}</div>
                           <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-1">/ Rotation</div>
                        </div>
                        <button 
@@ -220,12 +246,12 @@ export default function HotelDetailPage() {
               )}
            </section>
 
-           <div className="pt-20 border-t border-border">
+           <div className="pt-10 border-t border-border">
               {/* IMPORTANT: Pass primaryRoom.id for correct 200 response on backend */}
               <RoomComments roomId={primaryRoom?.id || hotel.id} />
            </div>
 
-           <footer className="py-24 border-t border-border bg-card/30 backdrop-blur-md text-center relative mt-20">
+           <footer className="py-12 border-t border-border bg-card/30 backdrop-blur-md text-center relative mt-10">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                  <button 
                    onClick={() => {
@@ -243,7 +269,7 @@ export default function HotelDetailPage() {
                     }}
                    className="group flex flex-col items-center gap-4 transition-all duration-700 hover:-translate-y-2"
                  >
-                    <div className="w-px h-12 bg-gradient-to-b from-transparent via-gold to-gold/20" />
+                    <div className="w-px h-6 bg-gradient-to-b from-transparent via-gold to-gold/20" />
                     <div className="w-9 h-9 rounded-full border border-gold/30 flex items-center justify-center bg-background group-hover:border-gold group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
                     </div>

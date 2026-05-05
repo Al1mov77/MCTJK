@@ -114,7 +114,7 @@ export default function RoomComments({ roomId }: { roomId: string }) {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <div className="flex items-center justify-between pb-4 border-b border-border">
         <h6 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold italic font-sans">Guest Experiences</h6>
         <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{comments.length} Logged Entries</span>

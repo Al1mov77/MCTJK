@@ -264,7 +264,7 @@ export default function HomePage() {
 
           <section className="gallery-section min-h-screen py-20 relative overflow-hidden flex items-center bg-background/20">
              <div className="absolute top-20 left-6 md:left-20 z-20">
-                <h2 className="text-[15vw] md:text-[10vw] font-bold tracking-tighter uppercase opacity-5 select-none italic leading-none">{t.home.catalogTitle}</h2>
+                <h2 className="text-[12vw] md:text-[8vw] font-bold tracking-tighter uppercase opacity-5 select-none italic leading-none">{t.home.catalogTitle}</h2>
              </div>
              
              <div className="horizontal-wrapper flex flex-col md:flex-row items-center md:h-full px-6 md:px-[10vw] gap-12 md:gap-16 w-full md:w-max">
@@ -301,7 +301,7 @@ export default function HomePage() {
                       <Cpu size={14} className="text-gold" />
                       <span className="text-[8px] uppercase tracking-widest font-bold text-foreground">{t.home.bufferMetric}</span>
                    </div>
-                   <h2 className="text-4xl md:text-7xl font-bold uppercase tracking-tight leading-[1] text-foreground drop-shadow-2xl">{t.home.bufferTitle}</h2>
+                   <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1] text-foreground drop-shadow-2xl">{t.home.bufferTitle}</h2>
                    <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] leading-loose opacity-60 max-w-md mx-auto md:mx-0 font-medium">
                       {t.home.bufferDesc}
                    </p>
@@ -320,7 +320,7 @@ export default function HomePage() {
              </div>
           </section>
 
-          <footer className="py-24 px-6 border-t border-border bg-card backdrop-blur-md text-center relative overflow-hidden">
+          <footer className="py-12 px-6 border-t border-border bg-card backdrop-blur-md text-center relative overflow-hidden">
              {/* Sovereign Ascent (Back to Top) */}
              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
                 <button 
@@ -339,7 +339,7 @@ export default function HomePage() {
                   }}
                   className="group flex flex-col items-center gap-4 transition-all duration-700 hover:-translate-y-2"
                 >
-                   <div className="w-px h-16 bg-gradient-to-b from-transparent via-gold to-gold/20" />
+                   <div className="w-px h-8 bg-gradient-to-b from-transparent via-gold to-gold/20" />
                    <div className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center bg-background group-hover:border-gold group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
                    </div>

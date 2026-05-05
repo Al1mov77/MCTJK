@@ -8,14 +8,22 @@ export class HotelsService {
 
   private parseHotel(hotel: any) {
     if (!hotel) return null;
+    const rooms = hotel.rooms?.map((r: any) => ({
+      ...r,
+      images: r.images ? JSON.parse(r.images) : [],
+    })) || [];
+    
+    // Find minimum price among rooms
+    const minPrice = rooms.length > 0 
+      ? Math.min(...rooms.map((r: any) => r.price)) 
+      : 0;
+
     return {
       ...hotel,
       images: hotel.images ? JSON.parse(hotel.images) : [],
       skills: hotel.skills ? JSON.parse(hotel.skills) : [],
-      rooms: hotel.rooms?.map((r: any) => ({
-        ...r,
-        images: r.images ? JSON.parse(r.images) : [],
-      }))
+      rooms,
+      price: minPrice || 770 // Fallback price if no rooms
     };
   }
 
